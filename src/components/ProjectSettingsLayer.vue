@@ -9,7 +9,7 @@
 			</a>
 		</div>
 		<div class="rp-layer-body" v-if="layer.expanded">
-			body
+			body {{layer._id}}
 		</div>
 	</div>
 </template>
@@ -39,7 +39,7 @@ export default {
 		},
 		tryExpandLayer: function() {
 			if (this.layer.visible) {
-				this.$store.dispatch("project/switchLayerExpand",this.layer)
+				this.$store.dispatch("project/switchLayerExpand",this.layer);
 			}
 		}
 	}

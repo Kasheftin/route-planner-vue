@@ -28,6 +28,9 @@ const actions = {
 	},
 	switchLayerVisibility: function({commit},data) {
 		commit("switchLayerVisibility",data);
+	},
+	resortLayers: function({commit},from,to) {
+		commit("resortLayers",from,to);
 	}
 }
 
@@ -73,6 +76,11 @@ const mutations = {
 		if (l) {
 			Vue.set(l,"visible",!l.visible);
 		}
+	},
+	resortLayers: function(state,from,to) {
+		var a = state.data.layers;
+		a[from] = a.splice(to,1,a[from])[0];
+		Vue.set(state.data,"layers",a);
 	}
 }
 

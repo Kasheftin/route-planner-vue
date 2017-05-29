@@ -9,7 +9,7 @@
 			<h4>{{name}}</h4>
 			<p v-if="description">{{description}}</p>
 		</div>
-		<div class="rp-layers">
+		<div class="rp-layers" ref="list">
 			<ProjectSettingsLayer v-for="l in layers" v-on:selectLayer="selectLayer(l._id)" v-on:deselectLayer="selectLayer()" :key="l._id" :layer="l" :selected="l._id==selectedLayerId"></ProjectSettingsLayer>
 		</div>
 	</div>
@@ -18,6 +18,7 @@
 <script>
 
 import {mapActions,mapState} from "vuex";
+import Sortable from "sortablejs";
 import ProjectSettingsLayer from "./ProjectSettingsLayer.vue";
 
 export default {
@@ -40,6 +41,9 @@ export default {
 		selectLayer: function(_id) {
 			this.selectedLayerId = _id;
 		},
+		reorderLayers: function(event) {
+			console.log("event",event);
+		},
 		saveProject: function() {
 			var r = [
 				"Project saved.",
@@ -47,10 +51,17 @@ export default {
 				"Some long text goes here. Includes over 250 glyphs in font format from the Glyphicon Halflings set. Glyphicons Halflings are normally not available for free, but their creator has made them available for Bootstrap free of cost. As a thank you, we only ask that you include a link back to Glyphicons whenever possible."
 			]
 			this.$bus.$emit("success",r[Math.floor(Math.random()*r.length)]);
-		},
+		}
 	},
 	components: {
 		ProjectSettingsLayer: ProjectSettingsLayer
+	},
+	mounted: function() {
+		Sortable.create(this.$refs.list,{
+			onEnd: (e) => {
+				this.$store.dispatch("project/resortLayers",e.oldIndex,e.newIndex);
+			}
+		});
 	}
 }
 
