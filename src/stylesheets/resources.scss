@@ -1,0 +1,24 @@
+@mixin google-box-overlay {
+	box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px;
+	border-radius: 2px;
+}
+
+@mixin linkcontrol {
+	color: #555555;
+	&:hover {
+		color: #111111;
+		text-decoration: none;
+	}
+	&:focus {
+		text-decoration: none;
+	}
+	&.-active {
+		color: #111111;
+	}
+	&.-inactive {
+		color: #777777;
+	}
+	&.-inactive:hover {
+		color: #777777;
+	}
+}
