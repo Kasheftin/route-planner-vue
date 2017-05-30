@@ -8,6 +8,9 @@
 			</div>
 			<h4>{{name}}</h4>
 			<p v-if="description">{{description}}</p>
+			<p>
+				<a class="rp-settings-add-layer" href="javascript:void(0)" @click="addLayer()">Add Layer</a>
+			</p>
 		</div>
 		<div class="rp-layers" ref="list">
 			<ProjectSettingsLayer v-for="l in layers" v-on:selectLayer="selectLayer(l._id)" v-on:deselectLayer="selectLayer()" :key="l._id" :layer="l" :selected="l._id==selectedLayerId"></ProjectSettingsLayer>
@@ -41,6 +44,11 @@ export default {
 		selectLayer: function(_id) {
 			this.selectedLayerId = _id;
 		},
+		addLayer: function() {
+			this.$store.dispatch("project/addLayer",{expanded:true}).then((newLayer) => {
+				this.selectLayer(newLayer._id);
+			});
+		},
 		saveProject: function() {
 			var r = [
 				"Project saved.",
@@ -57,7 +65,7 @@ export default {
 		Sortable.create(this.$refs.list,{
 			handle: ".rp-layer-header-title",
 			onEnd: (e) => {
-				this.$store.dispatch("project/resortLayers",e.oldIndex,e.newIndex);
+				this.$store.dispatch("project/moveLayer",e);
 			}
 		});
 	}
