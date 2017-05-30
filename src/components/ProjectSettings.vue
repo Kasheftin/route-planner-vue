@@ -41,9 +41,6 @@ export default {
 		selectLayer: function(_id) {
 			this.selectedLayerId = _id;
 		},
-		reorderLayers: function(event) {
-			console.log("event",event);
-		},
 		saveProject: function() {
 			var r = [
 				"Project saved.",
@@ -58,6 +55,7 @@ export default {
 	},
 	mounted: function() {
 		Sortable.create(this.$refs.list,{
+			handle: ".rp-layer-header-title",
 			onEnd: (e) => {
 				this.$store.dispatch("project/resortLayers",e.oldIndex,e.newIndex);
 			}

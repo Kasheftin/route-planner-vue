@@ -5,6 +5,7 @@
 
 @mixin linkcontrol {
 	color: #555555;
+	transition: color 0.3s ease;
 	&:hover {
 		color: #111111;
 		text-decoration: none;
