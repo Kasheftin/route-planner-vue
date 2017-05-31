@@ -76,6 +76,7 @@ html,body,.rp-container,.vue-map-container {
 	background-color: #ffffff;
 	overflow: auto;
 	transition: transform 0.3s ease;
+	z-index: 2;
 	&-inner {
 		margin: 0 10px;
 	}
@@ -104,18 +105,44 @@ html,body,.rp-container,.vue-map-container {
 	padding-bottom: 0;
 }
 
+.rp-search {
+	transition: transform 0.3s ease;
+	position: fixed;
+	top: 30px;
+	left: 370px;
+	width: 400px;
+	transform: all 0.3s ease;
+	&-box {
+		@include google-box-overlay;
+		border: 1px solid #ffffff;
+		&:focus {
+			box-shadow: inset 0 1px 1px rgba(0,0,0,0.075), 0 0 8px rgba(102,175,233,0.6);
+			border-color: #66afe9;
+		}
+	}
+	.fa {
+		position: absolute;
+		top: 8px;
+		right: 8px;
+		font-size: 17px;
+		line-height: 17px;
+		@include linkcontrol;
+	}
+}
 
 .rp-modal-enter-active,.rp-modal-leave-active {
 	transition: all 0.3s ease;
-
 }
 .rp-modal-enter {
 	opacity: 0;
 	.rp-modal {
 		transform: translateX(50px);
 	}
-	&.rp-settings {
+	.rp-settings {
 		transform: translateY(-50px);
+	}
+	.rp-search {
+		transform: translateX(-100%);
 	}
 }
 .rp-modal-leave-to {
@@ -123,7 +150,10 @@ html,body,.rp-container,.vue-map-container {
 	.rp-modal {
 		transform: translateX(-50px);
 	}
-	&.rp-settings {
+	.rp-settings {
 		transform: translateY(-50px);
+	}
+	.rp-search {
+		transform: translateX(-100%);
 	}
 }

@@ -27,6 +27,12 @@ const saveState = _.debounce((state) => {
 	window.localStorage.setItem(STORAGE_KEY,JSON.stringify(getters.viewport(state)));
 },1000);
 
+const actions = {
+	update: function({commit},data) {
+		commit("update",data);
+	}
+}
+
 const mutations = {
 	update: function(state,{what,e}) {
 		if (what == "center") {
@@ -46,6 +52,7 @@ const mutations = {
 export default {
 	state,
 	getters,
+	actions,
 	mutations,
 	namespaced: true
 }

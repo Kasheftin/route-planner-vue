@@ -4,6 +4,7 @@ import * as VueGoogleMaps from "vue2-google-maps";
 import "./vendors";
 import "./stylesheets/main.scss";
 import App from "./components/App.vue";
+import PromisesBus from "./utils/PromisesBus";
 import store from "./store";
 
 Vue.use(VueGoogleMaps,{
@@ -19,11 +20,18 @@ Object.defineProperty(Vue.prototype,"$bus",{
 	}
 });
 
+Object.defineProperty(Vue.prototype,"$promises",{
+	get: function() {
+		return this.$root.promisesBus;
+	}
+});
+
 new Vue({
 	el: "#app",
 	template: "<App />",
 	data: {
-		bus: new Vue({})
+		bus: new Vue({}),
+		promisesBus: new PromisesBus()
 	},
 	store: store,
 	components: {

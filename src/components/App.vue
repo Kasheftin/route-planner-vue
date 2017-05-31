@@ -8,12 +8,22 @@
 			@center_changed="updateViewport({what:'center',e:$event})"
 			@maptypeid_changed="updateViewport({what:'mapTypeId',e:$event})"
 			ref="map"
-		></gmap-map>
+		>
+			<gmap-marker
+				v-for="r in mapSearchResults"
+				:key="r._id"
+				:position="r.position"
+				:icon="r.icon"
+			></gmap-marker>
+		</gmap-map>
 		<transition name="rp-modal">
-			<template v-if="projectInitialized">
+			<div v-if="projectInitialized">
 				<ProjectSettings />
-			</template>
-			<template v-else>
+				<SearchBox />
+			</div>
+		</transition>
+		<transition name="rp-modal">
+			<template v-if="!projectInitialized">
 				<ProjectManager />
 			</template>
 		</transition>
@@ -29,13 +39,15 @@ import {mapState,mapActions,mapMutations} from "vuex";
 import ProjectManager from "./ProjectManager.vue";
 import ProjectSettings from "./ProjectSettings.vue";
 import ProjectInfoEditor from "./ProjectInfoEditor.vue";
+import SearchBox from "./SearchBox.vue";
 import Toastr from "./Toastr.vue";
 
 export default {
 	name: "App",
 	data: function() {
 		return {
-			modalWindowComponent: undefined
+			modalWindowComponent: undefined,
+			query: ""
 		}
 	},
 	computed: {
@@ -46,10 +58,13 @@ export default {
 		}),
 		...mapState("project",{
 			projectInitialized: state => state.initialized
+		}),
+		...mapState("search",{
+			mapSearchResults: state => state.results
 		})
 	},
 	methods: {
-		...mapMutations({
+		...mapActions({
 			updateViewport: "viewport/update"
 		})
 	},
@@ -62,10 +77,7 @@ export default {
 		}
 		this.$bus.$on("switchModal",this._switchModal);
 		this.$bus.$on("closeModal",this._closeModal);
-	},
-	destroyed: function() {
-		this.$bus.$off("switchModal",this._switchModal);
-		this.$bus.$off("closeModal",this._closeModal);
+		this.$promises.register("mapReady");
 	},
 	mounted: function() {
 		navigator.geolocation && navigator.geolocation.getCurrentPosition(position => {
@@ -73,7 +85,8 @@ export default {
 			this.data.center.lng = position.coords.longitude
 		});
 		this.$refs.map.$mapCreated.then(() => {
-			this.$refs.map.$mapObject.setOptions({
+			this.map = this.$refs.map.$mapObject;
+			this.map.setOptions({
 				mapTypeControl: true,
 				mapTypeControlOptions: {
 					mapTypeIds: [google.maps.MapTypeId.ROADMAP,google.maps.MapTypeId.HYBRID,google.maps.MapTypeId.SATELLITE,google.maps.MapTypeId.TERRAIN],
@@ -96,12 +109,36 @@ export default {
 				overviewMapControl: true,
 				rotateControl: true
 			});
+			this.map.addListener("bounds_changed",() => {
+				this.$bus.$emit("mapBoundsChanged",this.map.getBounds());
+			});
+			this._setMapBounds = (results) => {
+				const bounds = new google.maps.LatLngBounds();
+				results.forEach((r) => {
+					if (r.geometry && r.geometry.viewport) {
+						bounds.union(r.geometry.viewport);
+					}
+					else if (r.geometry && r.geometry.location) {
+						bounds.extend(r.geometry.location);
+					}
+				});
+				this.map.fitBounds(bounds);
+			}
+			this.$bus.$on("setMapBounds",this._setMapBounds);
+			this.$promises.resolve("mapReady",this.map);
 		});
+	},
+	beforeDestroy: function() {
+		["switchModal","closeModal","setMapBounds"].forEach((f) => {
+			this.hasOwnProperty("_"+f) && this.$bus.$off(f,this["_"+f]);
+		});
+		this.$promises.unregister("mapReady");
 	},
 	components: {
 		ProjectManager: ProjectManager,
 		ProjectSettings: ProjectSettings,
 		ProjectInfoEditor: ProjectInfoEditor,
+		SearchBox: SearchBox,
 		Toastr: Toastr
 	}
 }

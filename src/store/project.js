@@ -15,7 +15,7 @@ const actions = {
 		commit("setProject",config.newProject);
 	},
 	close: function({commit}) {
-		commit("setProject");
+		commit("closeProject");
 	},
 	switchLayerExpand: function({commit},data) {
 		const l = _.find(state.data.layers,{_id:data._id});
@@ -57,6 +57,7 @@ const createNewLayer = function(data) {
 
 const mutations = {
 	setProject: function(state,data) {
+		if (!data) data = {};
 		if (!data._id) data._id = (new ObjectID).toString();
 		data = _.extend({
 			name: "",
@@ -66,7 +67,11 @@ const mutations = {
 		data = _.pick(data,"_id","name","description","layers");
 		data.layers = _.map(data.layers,createNewLayer);
 		Vue.set(state,"data",data);
-		Vue.set(state,"initialized",!!data);
+		Vue.set(state,"initialized",true);
+	},
+	closeProject: function(state) {
+		Vue.set(state,"data",undefined);
+		Vue.set(state,"initialized",false);
 	},
 	updateInfo: function(state,data) {
 		Vue.set(state.data,"name",data.name);
