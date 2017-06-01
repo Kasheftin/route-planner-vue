@@ -10,6 +10,7 @@
 			ref="map"
 		>
 			<SearchResults />
+			<SearchDetailedResult />
 		</gmap-map>
 		<transition name="rp-modal">
 			<div v-if="projectInitialized">
@@ -36,6 +37,7 @@ import ProjectSettings from "./ProjectSettings.vue";
 import ProjectInfoEditor from "./ProjectInfoEditor.vue";
 import SearchBox from "./SearchBox.vue";
 import SearchResults from "./SearchResults.vue";
+import SearchDetailedResult from "./SearchDetailedResult.vue";
 import Toastr from "./Toastr.vue";
 
 export default {
@@ -54,42 +56,6 @@ export default {
 			projectInitialized: state => state.initialized
 		})
 	},
-	methods: {
-		addPOIHook: function() {
-			const self = this;
-			if (google.maps.InfoWindow.prototype.POIHookAdded) return;
-			var set = google.maps.InfoWindow.prototype.set;
-			google.maps.InfoWindow.prototype.set = function(key,val) {
-				if (key == "map") {
-					const $content = $(this.content);
-					if ($content.find(".POIHook").length==0) {
-						const $link = $("<a href='#'>Add to Map</a>");
-						$link.click(() => {
-							const address = [];
-							$content.find("div.address > div").each(function() {
-								address.push($(this).text());
-							});
-							const r = {
-								name: $content.find("div.title").text(),
-								formatted_address: address.join(", "),
-								geometry: {
-									location: this.getPosition()
-								}
-							}
-							self.$bus.$emit("tryAddSearchResult",r,(resultType) => {
-								if (resultType=="success") {
-									this.close();
-								}
-							});
-						});
-						$content.find("div.gm-style:first-child").append($("<div class='POIHook'></div>").append($link));
-					}
-				}
-				set.apply(this,arguments);
-			}
-			google.maps.InfoWindow.prototype.POIHookAdded = true;
-		}
-	},
 	created: function() {
 		this._switchModal = (name,options) => {
 			this.modalWindowComponent = (this.modalWindowComponent==name?undefined:name);
@@ -107,7 +73,6 @@ export default {
 		});
 		this.$refs.map.$mapCreated.then(() => {
 			this.map = this.$refs.map.$mapObject;
-			this.addPOIHook();
 			this.map.setOptions({
 				mapTypeControl: true,
 				mapTypeControlOptions: {
@@ -133,6 +98,12 @@ export default {
 			});
 			this.map.addListener("bounds_changed",() => {
 				this.$bus.$emit("mapBoundsChanged",this.map.getBounds());
+			});
+			this.map.addListener("click",(e) => {
+				if (e.placeId) {
+					e.stop();
+					this.$bus.$emit("toggleDetailedResult",e.placeId,"poi");
+				}
 			});
 			this._setMapBounds = (results) => {
 				const bounds = new google.maps.LatLngBounds();
@@ -165,6 +136,7 @@ export default {
 		ProjectInfoEditor: ProjectInfoEditor,
 		SearchBox: SearchBox,
 		SearchResults: SearchResults,
+		SearchDetailedResult: SearchDetailedResult,
 		Toastr: Toastr
 	}
 }

@@ -2,44 +2,44 @@ const state = {
 	results: []
 }
 
-let resultsCache = {};
-
-const getters = {
-	results: function(state,getters) {
-		return _.map(state.results,(id) => {
-			return resultsCache[id];
-		});
-	}
+const prepareResults = function(results) {
+	const data = [];
+	results.forEach((r) => {
+		if (r.geometry && r.geometry.location) {
+			data.push({
+				id: r.place_id,
+				location: {
+					lat: r.geometry.location.lat(),
+					lng: r.geometry.location.lng()
+				},
+				icon: r.icon
+			});
+		}
+	});
+	return data;
 }
 
 const actions = {
 	setResults: function({commit},results) {
-		commit("setResults",results);
+		commit("setResults",prepareResults(results));
 	},
 	appendResults: function({commit},results) {
-		commit("appendResults",results);
+		commit("appendResults",prepareResults(results));
 	}
 }
 
 const mutations = {
 	setResults: function(state,results) {
-		const ids = [];
-		const cache = {};
-		(results||[]).forEach((r) => {
-			if (!cache[r.id]) {
-				cache[r.id] = r;
-				ids.push(r.id);
-			}
-		});
-		state.results = ids;
-		resultsCache = cache;
+		state.results = results;
 	},
 	appendResults: function(state,results) {
-		if (!results || results.length==0) return;
-		(results||[]).forEach((r) => {
-			if (!resultsCache[r.id]) {
-				resultsCache[r.id] = r;
-				state.results.push(r.id);
+		const map = {};
+		state.results.forEach((r) => {
+			map[r.id] = true;
+		});
+		results.forEach((r) => {
+			if (!map[r.id]) {
+				state.results.push(r);
 			}
 		});
 	}
@@ -47,7 +47,6 @@ const mutations = {
 
 export default {
 	state,
-	getters,
 	actions,
 	mutations,
 	namespaced: true

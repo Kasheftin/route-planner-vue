@@ -41,6 +41,9 @@ const actions = {
 			commit("appendLayer",newLayer);
 			resolve(newLayer);
 		});
+	},
+	addShape: function({commit},data) {
+		commit("addShape",data);
 	}
 }
 
@@ -50,9 +53,10 @@ const createNewLayer = function(data) {
 	data = _.extend({
 		name: "Untitled layer",
 		expanded: false,
-		visible: true
+		visible: true,
+		shapes: []
 	},data);
-	return _.pick(data,"_id","name","expanded","visible");
+	return _.pick(data,"_id","name","expanded","visible","shapes");
 }
 
 const mutations = {
@@ -107,6 +111,12 @@ const mutations = {
 	},
 	appendLayer: function(state,data) {
 		state.data.layers.unshift(data);
+	},
+	addShape: function(state,data) {
+		if (!data.layerId) throw new Error("addShape failed, layerId not specified");
+		const l = _.find(state.data.layers,{_id:data.layerId});
+		if (!l) throw new Error("addShape failed, layer with specified id does not exist");
+
 	}
 }
 

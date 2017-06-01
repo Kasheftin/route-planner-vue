@@ -69,8 +69,8 @@ export default {
 			}
 		});
 		this._tryAddSearchResult = (r,callback) => {
-			console.log("tryAddSearchResult",r);
 			if (this.selectedLayerId) {
+				this.$store.dispatch("project/addShape",{layerId:this.selectedLayerId,data:r});
 				this.$bus.$emit("success","Search result has been added to the project.");
 				return callback && callback("success");
 			}

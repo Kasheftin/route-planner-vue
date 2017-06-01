@@ -14,7 +14,7 @@
 		<transition :css="false" @before-enter="bodyAnimBeforeEnter" @enter="bodyAnimEnter" @leave="bodyAnimLeave">
 			<div class="rp-layer-body-container" v-if="layer.expanded">
 				<div class="rp-layer-body">
-					body {{layer._id}}
+					<div class="rp-layer-body-empty" v-if="layer.shapes.length==0">-- Empty --</div>
 				</div>
 			</div>
 		</transition>
@@ -112,6 +112,16 @@ export default {
 	}
 	&-body-container {
 		overflow: hidden;
+	}
+	&-body {
+		border-top: 1px dotted #e5e5e5;
+		padding: 8px 0;
+		margin-top: 5px;
+		margin-left: 15px;
+		&-empty {
+			padding: 5px;
+			background-color: #dedede;
+		}
 	}
 }
 

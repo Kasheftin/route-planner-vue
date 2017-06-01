@@ -162,10 +162,13 @@ html,body,.rp-container,.vue-map-container {
 	width: 350px;
 	h1,h2,h3 {
 		margin-top: 0;
-		margin-bottom: 5px;
+		margin-bottom: 8px;
 	}
 	p {
-		margin-bottom: 5px;
+		margin-bottom: 8px;
+		&:last-child {
+			margin-bottom: 0;
+		}
 	}
 	&-param {
 		&-field {
@@ -173,13 +176,31 @@ html,body,.rp-container,.vue-map-container {
 		}
 	}
 	&-photos {
-		margin-bottom: 5px;
-		img {
-			display: inline-block;
-			margin-left: 2px;
-			&:first-child {
-				margin-left: 0;
-			}
+		margin: 10px 0;
+	}
+	&-photo {
+		display: block;
+		float: left;
+		width: 160px;
+		height: 120px;
+		background: transparent 50% 50% no-repeat;
+		background-size: cover;
+		margin: 5px;
+		transition: transform 0.3s ease;
+		&:hover {
+			transform: scale(1.05,1.05);
+		}
+		&-img {
+			opacity: 0;
+			width: 100%;
+			height: 100%;
+		}
+	}
+	&-action {
+		display: inline-block;
+		margin-left: 5px;
+		&:first-child {
+			margin-left: 0;
 		}
 	}
 }

@@ -6,6 +6,9 @@
 </template>
 
 <script>
+
+const detailedResults = {};
+
 export default {
 	data: function() {
 		return {
@@ -30,7 +33,7 @@ export default {
 					this.$store.dispatch("search/appendResults",results);
 				});
 			}
-		},500),
+		},500)
 	},
 	mounted: function() {
 		this.$promises.when("mapReady").then((map) => {
@@ -48,13 +51,23 @@ export default {
 				this.sb.setBounds(bounds);
 				this.updateSearchResults();
 			}
+			this._getDetailedResult = (placeId,callback) => {
+				if (detailedResults[placeId]) return callback && callback(detailedResults[placeId]["resultType"],detailedResults[placeId]["result"]);
+				console.log("here, request for",placeId);
+				this.service.getDetails({placeId:placeId},(place,status) => {
+					detailedResults[placeId] = {resultType:status==google.maps.places.PlacesServiceStatus.OK?"success":"error",result:place};
+					return callback && callback(detailedResults[placeId]["resultType"],detailedResults[placeId]["result"]);
+				});
+			}
 			this.$bus.$on("mapBoundsChanged",this._mapBoundsChanged);
+			this.$bus.$on("getDetailedResult",this._getDetailedResult);
 			this.$refs.searchbox.focus();
 		});
 	},
 	beforeDestroy: function() {
 		this.$store.dispatch("search/setResults",[]);
 		this._mapBoundsChanged && this.$bus.$off("mapBoundsChanged",this._mapBoundsChanged);
+		this._getDetailedResult && this.$bus.$off("getDetailedResult",this._getDetailedResult);
 	}
 }
 </script>
