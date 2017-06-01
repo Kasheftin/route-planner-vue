@@ -8,6 +8,10 @@ const prepareResults = function(results) {
 	const data = [];
 	results.forEach((r) => {
 		if (!r.geometry) return;
+		const photos = [];
+		(r.photos||[]).slice(0,2).forEach((p) => {
+			photos.push(p.getUrl({maxHeight:120,maxWidth:160}));
+		});
 		data.push({
 			address: r.formatted_address,
 			name: r.name,
@@ -18,7 +22,8 @@ const prepareResults = function(results) {
 			icon: r.icon,
 			_id: r.id,
 			reference: r.reference,
-			types: r.types
+			types: r.types,
+			photos: photos
 		});
 	});
 	return data;
@@ -26,6 +31,7 @@ const prepareResults = function(results) {
 
 const actions = {
 	setResults: function({commit},results) {
+		console.log("searchresults",results,prepareResults(results));
 		commit("setResults",prepareResults(results));
 	},
 	appendResults: function({commit},results) {

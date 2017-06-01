@@ -16,6 +16,7 @@ export default {
 		query: function(query) {
 			if (!query || query.length==0) {
 				this.$store.dispatch("search/setResults",[]);
+				this.$bus.$emit("clearSearchResults");
 			}
 			else {
 				this.updateSearchResults();
@@ -48,6 +49,7 @@ export default {
 				this.updateSearchResults();
 			}
 			this.$bus.$on("mapBoundsChanged",this._mapBoundsChanged);
+			this.$refs.searchbox.focus();
 		});
 	},
 	beforeDestroy: function() {

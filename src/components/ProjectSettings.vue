@@ -68,6 +68,20 @@ export default {
 				this.$store.dispatch("project/moveLayer",e);
 			}
 		});
+		this._tryAddSearchResult = (r,callback) => {
+			if (this.selectedLayerId) {
+				this.$bus.$emit("success","Search result has been added to the project.");
+				return callback && callback("success");
+			}
+			else {
+				this.$bus.$emit("error","Please select the layer you want to add search result to.");
+				return callback && callback("error");
+			}
+		}
+		this.$bus.$on("tryAddSearchResult",this._tryAddSearchResult);
+	},
+	beforeDestroy: function() {
+		this._tryAddSearchResult && this.$bus.$off("tryAddSearchResult",this._tryAddSearchResult);
 	}
 }
 

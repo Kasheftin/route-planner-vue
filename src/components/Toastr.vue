@@ -1,7 +1,7 @@
 <template>
 	<transition-group name="rp-toastrs" tag="div" class="rp-toastrs" :css="false" @before-enter="beforeEnter" @enter="enter" @leave="leave">
 		<div class="rp-toastr-container" v-for="(n,i) in notifications" :key="n.key">
-			<div class="rp-toastr alert" :class="'alert-'+n.type">
+			<div class="rp-toastr alert" :class="'alert-'+n.css">
 				<button type="button" class="close fa fa-times" @click="close(i,$event)"></button>
 				<button type="button" class="close fa fa-thumb-tack" v-if="!n.pinned" @click="n.pinned=true"></button>
 				{{n.message}}
@@ -47,7 +47,7 @@ export default {
 	},
 	created: function() {
 		const cn = (message,type) => {
-			this.notifications.push({type:type,message:message,created:(new Date).getTime(),show:true,pinned:false,key:Math.random()});
+			this.notifications.push({type:type,css:(type=="error"?"danger":type),message:message,created:(new Date).getTime(),show:true,pinned:false,key:Math.random()});
 		}
 		this._se = (message) => cn(message,"error");
 		this._ss = (message) => cn(message,"success");

@@ -9,12 +9,7 @@
 			@maptypeid_changed="updateViewport({what:'mapTypeId',e:$event})"
 			ref="map"
 		>
-			<gmap-marker
-				v-for="r in mapSearchResults"
-				:key="r._id"
-				:position="r.position"
-				:icon="r.icon"
-			></gmap-marker>
+			<SearchResults />
 		</gmap-map>
 		<transition name="rp-modal">
 			<div v-if="projectInitialized">
@@ -40,14 +35,15 @@ import ProjectManager from "./ProjectManager.vue";
 import ProjectSettings from "./ProjectSettings.vue";
 import ProjectInfoEditor from "./ProjectInfoEditor.vue";
 import SearchBox from "./SearchBox.vue";
+import SearchResults from "./SearchResults.vue";
 import Toastr from "./Toastr.vue";
 
 export default {
-	name: "App",
 	data: function() {
 		return {
 			modalWindowComponent: undefined,
-			query: ""
+			mapSearchInfoWindowPosition: undefined,
+			mapSearchInfoWindowOpened: false
 		}
 	},
 	computed: {
@@ -58,9 +54,6 @@ export default {
 		}),
 		...mapState("project",{
 			projectInitialized: state => state.initialized
-		}),
-		...mapState("search",{
-			mapSearchResults: state => state.results
 		})
 	},
 	methods: {
@@ -139,6 +132,7 @@ export default {
 		ProjectSettings: ProjectSettings,
 		ProjectInfoEditor: ProjectInfoEditor,
 		SearchBox: SearchBox,
+		SearchResults: SearchResults,
 		Toastr: Toastr
 	}
 }

@@ -157,3 +157,29 @@ html,body,.rp-container,.vue-map-container {
 		transform: translateX(-100%);
 	}
 }
+
+.rp-iwin {
+	width: 350px;
+	h1,h2,h3 {
+		margin-top: 0;
+		margin-bottom: 5px;
+	}
+	p {
+		margin-bottom: 5px;
+	}
+	&-param {
+		&-field {
+			font-weight: bold;
+		}
+	}
+	&-photos {
+		margin-bottom: 5px;
+		img {
+			display: inline-block;
+			margin-left: 2px;
+			&:first-child {
+				margin-left: 0;
+			}
+		}
+	}
+}
