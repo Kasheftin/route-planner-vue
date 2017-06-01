@@ -4,9 +4,9 @@
 			:center="center"
 			:zoom="zoom"
 			:mapTypeId="mapTypeId"
-			@zoom_changed="updateViewport({what:'zoom',e:$event})"
-			@center_changed="updateViewport({what:'center',e:$event})"
-			@maptypeid_changed="updateViewport({what:'mapTypeId',e:$event})"
+			@zoom_changed="$store.dispatch('viewport/update',{what:'zoom',e:$event})"
+			@center_changed="$store.dispatch('viewport/update',{what:'center',e:$event})"
+			@maptypeid_changed="$store.dispatch('viewport/update',{what:'mapTypeId',e:$event})"
 			ref="map"
 		>
 			<SearchResults />
@@ -41,9 +41,7 @@ import Toastr from "./Toastr.vue";
 export default {
 	data: function() {
 		return {
-			modalWindowComponent: undefined,
-			mapSearchInfoWindowPosition: undefined,
-			mapSearchInfoWindowOpened: false
+			modalWindowComponent: undefined
 		}
 	},
 	computed: {
@@ -54,11 +52,6 @@ export default {
 		}),
 		...mapState("project",{
 			projectInitialized: state => state.initialized
-		})
-	},
-	methods: {
-		...mapActions({
-			updateViewport: "viewport/update"
 		})
 	},
 	created: function() {
@@ -74,8 +67,7 @@ export default {
 	},
 	mounted: function() {
 		navigator.geolocation && navigator.geolocation.getCurrentPosition(position => {
-			this.data.center.lat = position.coords.latitude,
-			this.data.center.lng = position.coords.longitude
+			this.$store.dispatch("viewport/update",{what:"center",e:new google.maps.LatLng(position.coords.latitude,position.coords.longitude)});
 		});
 		this.$refs.map.$mapCreated.then(() => {
 			this.map = this.$refs.map.$mapObject;

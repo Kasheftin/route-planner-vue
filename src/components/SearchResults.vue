@@ -1,30 +1,31 @@
 <template>
 	<div>
 		<gmap-marker
-			v-for="r in mapSearchResults"
-			:key="r._id"
-			:position="r.position"
+			v-for="r in results"
+			v-if="r.geometry"
+			:key="r.id"
+			:position="r.geometry.location"
 			:icon="{url:r.icon,scaledSize:iconSize}"
 			:clickable="true"
 			@click="toggleInfoWindow(r)"
 		></gmap-marker>
-		<gmap-info-window ref="infoWindow" :options="infoWindowOptions" :position="infoWindowPosition" :opened="!!r" @closeclick="toggleInfoWindow()" v-if="!!r">
+		<gmap-info-window ref="infoWindow" v-if="!!r" :options="infoWindowOptions" :position="r.geometry.location" @closeclick="toggleInfoWindow()">
 			<div class="rp-iwin">
 				<h3 v-if="!!r.name">{{r.name}}</h3>
-				<p class="rp-iwin-param" v-if="!!r.address">
+				<p class="rp-iwin-param" v-if="!!r.formatted_address">
 					<span class="rp-iwin-param-field">Address: </span>
-					<span class="rp-iwin-param-value">{{r.address}}</span>
+					<span class="rp-iwin-param-value">{{r.formatted_address}}</span>
 				</p>
 				<p class="rp-iwin-param" v-if="r.types">
 					<span class="rp-iwin-param-field">Tags: </span>
 					<span class="rp-iwin-param-value">{{r.types|commedArray}}</span>
 				</p>
-				<p class="rp-iwin-param" v-if="r.position">
+				<p class="rp-iwin-param" v-if="r.geometry.location">
 					<span class="rp-iwin-param-field">Location: </span>
-					<span class="rp-iwin-param-value">{{r.position|latlng}}</span>
+					<span class="rp-iwin-param-value">{{r.geometry.location|latlng}}</span>
 				</p>
-				<div class="rp-iwin-photos" v-if="r.photos">
-					<img class="rp-iwin-photo" v-for="p in r.photos" :src="p" />
+				<div class="rp-iwin-photos" v-if="r.thumbs">
+					<img class="rp-iwin-photo" v-for="p in r.thumbs" :src="p" />
 				</div>
 				<p>
 					<a href="javascript:void(0)" @click="addToProject(r)">Add to Map</a>
@@ -40,14 +41,19 @@ import {mapState} from "vuex";
 export default {
 	data: function() {
 		return {
-			infoWindowPosition: undefined,
 			r: undefined
 		}
 	},
 	computed: {
-		...mapState("search",{
-			mapSearchResults: state => state.results
-		}),
+		results: function() {
+			const results = this.$store.getters["search/results"];
+			(results||[]).forEach((r) => {
+				r.thumbs = _.map((r.photos||[]).slice(0,2),(p) => {
+					return p.getUrl({maxHeight:120,maxWidth:160});
+				});
+			});
+			return results;
+		},
 		infoWindowOptions: function() {
 			return {
 				pixelOffset: {
@@ -66,7 +72,6 @@ export default {
 				this.r = undefined;
 				return;
 			}
-			this.infoWindowPosition = r.position;
 			this.r = r;
 		},
 		addToProject: function(r) {
@@ -79,7 +84,7 @@ export default {
 	},
 	filters: {
 		latlng: function(ar) {
-			return ar.lat.toFixed(6)+", "+ar.lng.toFixed(6);
+			return ar.lat().toFixed(6)+", "+ar.lng().toFixed(6);
 		},
 		commedArray: function(ar) {
 			console.log("commedArray",ar);
