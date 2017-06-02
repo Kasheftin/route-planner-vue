@@ -12,17 +12,16 @@
 				<a class="rp-settings-add-layer" href="javascript:void(0)" @click="addLayer()">Add Layer</a>
 			</p>
 		</div>
-		<div class="rp-layers" ref="list">
-			<ProjectSettingsLayer v-for="l in layers" v-on:selectLayer="selectLayer(l._id)" v-on:deselectLayer="selectLayer()" :key="l._id" :layer="l" :selected="l._id==selectedLayerId"></ProjectSettingsLayer>
-		</div>
+		<Draggable :options="{handle:'.rp-layer-header-title'}" class="rp-layers" ref="list" @end="$store.dispatch('project/moveLayer',$event)">
+			<Layer v-for="l in layers" v-on:selectLayer="selectLayer(l.id)" v-on:deselectLayer="selectLayer()" :key="l.id" :layer="l" :selected="l.id==selectedLayerId" />
+		</Draggable>
 	</div>
 </template>
 
 <script>
 
 import {mapActions,mapState} from "vuex";
-import Sortable from "sortablejs";
-import ProjectSettingsLayer from "./ProjectSettingsLayer.vue";
+import Layer from "./Layer.vue";
 
 export default {
 	data: function() {
@@ -41,12 +40,12 @@ export default {
 		...mapActions({
 			closeProject: "project/close"
 		}),
-		selectLayer: function(_id) {
-			this.selectedLayerId = _id;
+		selectLayer: function(id) {
+			this.selectedLayerId = id;
 		},
 		addLayer: function() {
 			this.$store.dispatch("project/addLayer",{expanded:true}).then((newLayer) => {
-				this.selectLayer(newLayer._id);
+				this.selectLayer(newLayer.id);
 			});
 		},
 		saveProject: function() {
@@ -58,32 +57,45 @@ export default {
 			this.$bus.$emit("success",r[Math.floor(Math.random()*r.length)]);
 		}
 	},
-	components: {
-		ProjectSettingsLayer: ProjectSettingsLayer
-	},
 	mounted: function() {
-		Sortable.create(this.$refs.list,{
-			handle: ".rp-layer-header-title",
-			onEnd: (e) => {
-				this.$store.dispatch("project/moveLayer",e);
-			}
-		});
+		this._updateLayersHeight = () => {
+			const $list = $(this.$refs.list.$el);
+			$list.css("max-height",$(window).height()-$list.offset().top-30);
+			console.log("_updateLayersHeight",$(window).height()-$list.offset().top-30);
+		}
+		$(window).on("resize",this._updateLayersHeight);
+		this._updateLayersHeight();
+
+		if (this.layers.length>0) {
+			this.selectedLayerId = this.layers[0].id;
+		}
+
 		this._tryAddSearchResult = (r,callback) => {
-			if (this.selectedLayerId) {
-				this.$store.dispatch("project/addShape",{layerId:this.selectedLayerId,data:r});
-				this.$bus.$emit("success","Search result has been added to the project.");
-				return callback && callback("success");
-			}
-			else {
-				this.$bus.$emit("error","Please select the layer you want to add search result to.");
-				return callback && callback("error");
-			}
+			this.$store.dispatch("project/addShape",{layerId:this.selectedLayerId,type:"marker",data:r}).then((msg) => {
+				this.$bus.$emit("success",msg);
+				this.$bus.$emit("highlightLayer",this.selectedLayerId);
+				callback && callback("success");
+			}).catch((msg) => {
+				this.$bus.$emit("error",msg);
+				callback && callback("error");
+			});
+			this._updateLayersHeight();
 		}
 		this.$bus.$on("tryAddSearchResult",this._tryAddSearchResult);
 	},
 	beforeDestroy: function() {
 		this._tryAddSearchResult && this.$bus.$off("tryAddSearchResult",this._tryAddSearchResult);
+		this._updateLayersHeight && $(window).off("resize",this._updateLayersHeight);
+	},
+	components: {
+		Layer: Layer
 	}
 }
 
 </script>
+
+<style lang="scss" scoped>
+.rp-layers {
+	overflow-y: auto;
+}
+</style>

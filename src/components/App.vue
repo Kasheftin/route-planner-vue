@@ -11,16 +11,18 @@
 		>
 			<SearchResults />
 			<SearchDetailedResult />
+			<ProjectMarkers v-if="projectInitialized" />
+			<ProjectMarkerInfo />
 		</gmap-map>
 		<transition name="rp-modal">
 			<div v-if="projectInitialized">
-				<ProjectSettings />
+				<Project />
 				<SearchBox />
 			</div>
 		</transition>
 		<transition name="rp-modal">
 			<template v-if="!projectInitialized">
-				<ProjectManager />
+				<Manager />
 			</template>
 		</transition>
 		<transition name="rp-modal">
@@ -32,13 +34,15 @@
 
 <script>
 import {mapState,mapActions,mapMutations} from "vuex";
-import ProjectManager from "./ProjectManager.vue";
-import ProjectSettings from "./ProjectSettings.vue";
-import ProjectInfoEditor from "./ProjectInfoEditor.vue";
-import SearchBox from "./SearchBox.vue";
-import SearchResults from "./SearchResults.vue";
-import SearchDetailedResult from "./SearchDetailedResult.vue";
-import Toastr from "./Toastr.vue";
+import Manager from "./Manager.vue";
+import Project from "./project/Main.vue";
+import ProjectMarkers from "./project/Markers.vue";
+import ProjectMarkerInfo from "./project/MarkerInfo.vue";
+import ProjectInfoEditor from "./project/InfoEditor.vue";
+import SearchBox from "./search/Box.vue";
+import SearchResults from "./search/Results.vue";
+import SearchDetailedResult from "./search/DetailedResult.vue";
+import Toastr from "./utils/Toastr.vue";
 
 export default {
 	data: function() {
@@ -117,12 +121,16 @@ export default {
 				});
 				this.map.fitBounds(bounds);
 			}
+			this._setMapCenter = (center) => {
+				this.map.panTo(center);
+			}
 			this.$bus.$on("setMapBounds",this._setMapBounds);
+			this.$bus.$on("setMapCenter",this._setMapCenter);
 			this.$promises.resolve("mapReady",this.map);
 		});
 	},
 	beforeDestroy: function() {
-		["switchModal","closeModal","setMapBounds"].forEach((f) => {
+		["switchModal","closeModal","setMapBounds","setMapCenter"].forEach((f) => {
 			this.hasOwnProperty("_"+f) && this.$bus.$off(f,this["_"+f]);
 		});
 		this.$promises.unregister("mapReady");
@@ -131,8 +139,10 @@ export default {
 		this.$promises.unregister("mapReady");
 	},
 	components: {
-		ProjectManager: ProjectManager,
-		ProjectSettings: ProjectSettings,
+		Manager: Manager,
+		Project: Project,
+		ProjectMarkers: ProjectMarkers,
+		ProjectMarkerInfo: ProjectMarkerInfo,
 		ProjectInfoEditor: ProjectInfoEditor,
 		SearchBox: SearchBox,
 		SearchResults: SearchResults,

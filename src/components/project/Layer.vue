@@ -1,5 +1,5 @@
 <template>
-	<div class="rp-layer" :class="{'-selected':selected,'-invisible':!layer.visible}" @click="trySelectLayer()">
+	<div class="rp-layer" :class="{'-selected':selected,'-invisible':!layer.visible,'-highlighted':highlighted}" @click="trySelectLayer()">
 		<a href="javascript:void(0)" class="rp-layer-header" @click="tryExpandLayer()" :class="{'-inactive':!layer.visible,'-active':selected}">
 			<transition :css="false" @before-enter="iconAnimBeforeEnter" @enter="iconAnimEnter" @leave="iconAnimLeave">
 				<div class="rp-layer-header-expand-icon" v-if="layer.visible">
@@ -14,7 +14,13 @@
 		<transition :css="false" @before-enter="bodyAnimBeforeEnter" @enter="bodyAnimEnter" @leave="bodyAnimLeave">
 			<div class="rp-layer-body-container" v-if="layer.expanded">
 				<div class="rp-layer-body">
-					<div class="rp-layer-body-empty" v-if="layer.shapes.length==0">-- Empty --</div>
+					<div class="rp-layer-body-empty" v-show="showEmpty" ref="empty">-- Empty --</div>
+					<Draggable class="rp-layer-body-list" :options="{group:'shapes',handle:'.rp-layer-draggable'}" :value="layer.shapes" :move="checkMove" @start="startMove($event)" @end="moveShape($event)" :data-layer-id="layer.id">
+						<a v-for="s in layer.shapes" v-if="s.type=='marker'" href="javascript:void(0)" class="rp-layer-marker rp-layer-draggable" @click="flyToAndToggleMarkerInfo(s.data)">
+							<i class="rp-layer-marker-icon" :style="{backgroundImage:'url('+s.data.icon+')'}"></i>
+							<span class="rp-layer-marker-text">{{s.data.name}}</span>
+						</a>
+					</Draggable>
 				</div>
 			</div>
 		</transition>
@@ -22,14 +28,23 @@
 </template>
 
 <script>
-
 import Velocity from "velocity-animate";
 
 export default {
 	props: ["layer","selected"],
+	data: function() {
+		return {
+			highlighted: false,
+			dragging: false
+		};
+	},
 	computed: {
 		visible: function() {
 			return this.layer.visible;
+		},
+		showEmpty: function() {
+			if (this.dragging) return false;
+			return this.layer.shapes.length==0;
 		}
 	},
 	watch: {
@@ -78,14 +93,48 @@ export default {
 		},
 		bodyAnimLeave: function(el,done) {
 			Velocity(el,{height:0},{duration:300,complete:done});
+		},
+		startMove: function(e) {
+			this.$bus.$emit("shapeDragging",true);
+		},
+		checkMove: function(e) {
+			// TODO: hide/show `-- Empty --` dynamicaly
+			return true;
+		},
+		moveShape: function(e) {
+			this.$bus.$emit("shapeDragging",false);
+			this.$store.dispatch("project/moveShape",e);
+		},
+		flyToAndToggleMarkerInfo: function(data) {
+			this.$bus.$emit("setMapCenter",data.position);
+			this.$bus.$emit("toggleMarkerInfo",data);
 		}
+	},
+	mounted: function() {
+		this._highlightLayer = (id) => {
+			if (this.layer.id==id) {
+				this.highlighted = true;
+				this._highlightTimeout && clearTimeout(this._highlightTimeout);
+				this._highlightTimeout = setTimeout(() => {
+					this.highlighted = false;
+				},1000);
+			}
+		}
+		this._shapeDragging = (b) => {
+			this.dragging = b;
+		}
+		this.$bus.$on("shapeDragging",this._shapeDragging);
+		this.$bus.$on("highlightLayer",this._highlightLayer);
+	},
+	beforeDestroy: function() {
+		this._highlightLayer && this.$bus.$off("highlightLayer",this._highlightLayer);
+		this._shapeDragging && this.$bus.$off("shapeDragging",this._shapeDragging);
 	}
 }
 
 </script>
 
 <style lang="scss" scoped>
-
 .rp-layer {
 	border-top: 1px solid #e5e5e5;
 	border-left: 4px solid transparent;
@@ -96,6 +145,9 @@ export default {
 	transition: all 0.3s ease;
 	&.-selected {
 		border-left-color: #4d90fe;
+	}
+	&.-highlighted {
+		background-color: $state-info-bg;
 	}
 	&-header {
 		@include flexbox;
@@ -118,11 +170,43 @@ export default {
 		padding: 8px 0;
 		margin-top: 5px;
 		margin-left: 15px;
+		position: relative;
 		&-empty {
 			padding: 5px;
-			background-color: #dedede;
+			position: absolute;
+			top: 8px;
+			left: 0;
+			right: 0;
+			z-index: 1;
+		}
+		&-list {
+			min-height: 30px;
+			position: relative;
+			z-index: 2;
+		}
+	}
+	&-marker {
+		@include flexbox;
+		padding: 4px;
+		&:hover {
+			background-color: #efefef;
+			text-decoration: none;
+		}
+		&:focus {
+			text-decoration: none;
+		}
+		&-icon {
+			@include flex(0 0 auto);
+			height: 18px;
+			width: 18px;
+			margin-right: 5px;
+			background: transparent 50% 50% no-repeat;
+			background-size: contain;
+		}
+		&-text {
+			@include flex(1 1 auto);
+			line-height: 18px;
 		}
 	}
 }
-
 </style>

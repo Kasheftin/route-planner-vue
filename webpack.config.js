@@ -1,6 +1,12 @@
 var path = require("path")
 var webpack = require("webpack")
 
+var cssResources = [
+  "node_modules/sass-flex-mixin/_flex.scss",
+  "node_modules/bootstrap-sass/assets/stylesheets/bootstrap/_variables.scss",
+  "src/stylesheets/resources.scss"
+];
+
 module.exports = {
   entry: {
     app: ["babel-polyfill","./src/main.js"]
@@ -23,7 +29,7 @@ module.exports = {
             "scss": ["vue-style-loader","css-loader","sass-loader",{
               loader: "sass-resources-loader",
               options: {
-                resources: ["node_modules/sass-flex-mixin/_flex.scss","src/stylesheets/resources.scss"]
+                resources: cssResources
               }
             }]
           }
@@ -47,7 +53,7 @@ module.exports = {
         use: ["style-loader","css-loader","sass-loader",{
           loader: "sass-resources-loader",
           options: {
-            resources: ["node_modules/sass-flex-mixin/_flex.scss","src/stylesheets/resources.scss"]
+            resources: cssResources
           }
         }]
       }

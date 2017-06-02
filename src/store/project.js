@@ -18,7 +18,7 @@ const actions = {
 		commit("closeProject");
 	},
 	switchLayerExpand: function({commit},data) {
-		const l = _.find(state.data.layers,{_id:data._id});
+		const l = _.find(state.data.layers,{id:data.id});
 		if (l.visible) {
 			commit("switchLayerExpand",data);
 		}
@@ -43,32 +43,63 @@ const actions = {
 		});
 	},
 	addShape: function({commit},data) {
-		commit("addShape",data);
+		return new Promise((resolve,reject) => {
+			if (!data.layerId) return reject("Please select the layer you want to add place to.");
+			const l = _.find(state.data.layers,{id:data.layerId});
+			if (!l) return reject("Failed adding new place, specified layer does not exist.");
+			commit("addShape",data);
+			return resolve("Place has been added to the project.");
+		});
+	},
+	removeShape: function({commit},id) {
+		commit("removeShape",id);
+	},
+	moveShape: function({commit},e) {
+		commit("moveShape",e);
+	},
+	updateShapeNote: function({commit},data) {
+		commit("updateShapeNote",data);
 	}
 }
 
 const createNewLayer = function(data) {
 	if (!data) data = {};
-	if (!data._id) data._id = (new ObjectID).toString();
+	if (!data.id) data.id = (new ObjectID).toString();
 	data = _.extend({
 		name: "Untitled layer",
 		expanded: false,
 		visible: true,
 		shapes: []
 	},data);
-	return _.pick(data,"_id","name","expanded","visible","shapes");
+	return _.pick(data,"id","name","expanded","visible","shapes");
+}
+
+const prepareShapeData = function(data) {
+	const out = _.pick(data,"name","formatted_address","international_phone_number","icon","types","url","note");
+	if (!out.note) out.note = "";
+	out.id = (new ObjectID).toString();
+	out.position = {lat:data.geometry.location.lat(),lng:data.geometry.location.lng()};
+	out.placeId = data.place_id;
+	out.photos = [];
+	(data.photos||[]).forEach((p) => {
+		out.photos.push({
+			thumb: p.getUrl({maxHeight:240,maxWidth:360}),
+			big: p.getUrl({maxHeight:1200,maxWidth:1600})
+		});
+	});
+	return out;
 }
 
 const mutations = {
 	setProject: function(state,data) {
 		if (!data) data = {};
-		if (!data._id) data._id = (new ObjectID).toString();
+		if (!data.id) data.id = (new ObjectID).toString();
 		data = _.extend({
 			name: "",
 			description: "",
 			layers: []
 		},data);
-		data = _.pick(data,"_id","name","description","layers");
+		data = _.pick(data,"id","name","description","layers");
 		data.layers = _.map(data.layers,createNewLayer);
 		Vue.set(state,"data",data);
 		Vue.set(state,"initialized",true);
@@ -82,19 +113,19 @@ const mutations = {
 		Vue.set(state.data,"description",data.description);
 	},
 	switchLayerExpand: function(state,data) {
-		const l = _.find(state.data.layers,{_id:data._id});
+		const l = _.find(state.data.layers,{id:data.id});
 		if (l) {
 			Vue.set(l,"expanded",!l.expanded);
 		}
 	},
 	contractLayer: function(state,data) {
-		const l = _.find(state.data.layers,{_id:data._id});
+		const l = _.find(state.data.layers,{id:data.id});
 		if (l) {
 			Vue.set(l,"expanded",false);
 		}
 	},
 	switchLayerVisibility: function(state,data) {
-		const l = _.find(state.data.layers,{_id:data._id});
+		const l = _.find(state.data.layers,{id:data.id});
 		if (l) {
 			Vue.set(l,"visible",!l.visible);
 		}
@@ -113,10 +144,34 @@ const mutations = {
 		state.data.layers.unshift(data);
 	},
 	addShape: function(state,data) {
-		if (!data.layerId) throw new Error("addShape failed, layerId not specified");
-		const l = _.find(state.data.layers,{_id:data.layerId});
-		if (!l) throw new Error("addShape failed, layer with specified id does not exist");
-
+		const l = _.find(state.data.layers,{id:data.layerId});
+		if (l) {
+			data = _.pick(data,"type","data");
+			data.data = prepareShapeData(data.data);
+			l.shapes.push(data);
+		}
+	},
+	removeShape: function(state,id) {
+		state.data.layers.forEach((l) => {
+			let i = _.findIndex(l.shapes,s => s.data.id==id);
+			if (i===0||i>0) l.shapes.splice(i,1);
+		});
+	},
+	updateShapeNote: function(state,data) {
+		state.data.layers.forEach((l) => {
+			const s = _.find(l.shapes,s => s.data.id==data.id);
+			console.log("updateShapeNote",s,data);
+			if (s) {
+				s.data.note = data.note;
+			}
+		});
+	},
+	moveShape: function(state,e) {
+		const layerFrom = _.find(state.data.layers,{id:e.from.dataset.layerId});
+		const layerTo = _.find(state.data.layers,{id:e.to.dataset.layerId});
+		if (layerFrom && layerTo) {
+			layerTo.shapes.splice(e.newIndex,0,layerFrom.shapes.splice(e.oldIndex,1)[0]);
+		}
 	}
 }
 

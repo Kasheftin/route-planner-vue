@@ -63,14 +63,6 @@ export default {
 
 		}
 	},
-	filters: {
-		latlng: function(ar) {
-			return ar.lat().toFixed(6)+", "+ar.lng().toFixed(6);
-		},
-		commedArray: function(ar) {
-			return (ar||[]).join(", ");
-		}
-	},
 	mounted: function() {
 		this._toggleDetailedResult = (placeId,infoWindowType) => {
 			if (!placeId || (this.r && this.r.placeId==placeId)) {
