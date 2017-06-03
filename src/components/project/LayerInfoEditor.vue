@@ -55,11 +55,16 @@ export default {
 	},
 	methods: {
 		save: function() {
-//			this.$store.commit("project/updateInfo",{name:this.name,description:this.description});
-			this.$bus.$emit("closeModal");
+			this.$store.dispatch("project/updateLayerInfo",{id:(this.layer||{}).id,name:this.name,visible:this.visible}).then((msg) => {
+				this.$bus.$emit("success",msg);
+				this.$bus.$emit("closeModal");
+			}).catch((msg) => this.$bus.$emit("error",msg));
 		},
 		remove: function() {
-
+			this.$store.dispatch("project/removeLayer",(this.layer||{}).id).then((msg) => {
+				this.$bus.$emit("success",msg);
+				this.$bus.$emit("closeModal");
+			}).catch((msg) => this.$bus.$emit("error",msg));
 		}
 	}
 }

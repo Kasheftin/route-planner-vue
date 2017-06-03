@@ -17,6 +17,12 @@ const actions = {
 	close: function({commit}) {
 		commit("closeProject");
 	},
+	updateInfo: function({commit},data) {
+		return new Promise((resolve,reject) => {
+			commit("updateInfo",data);
+			resolve("Project info has been updated.");
+		});
+	},
 	switchLayerExpand: function({commit},data) {
 		commit("switchLayerExpand",data);
 	},
@@ -37,6 +43,22 @@ const actions = {
 			const newLayer = createNewLayer(data);
 			commit("appendLayer",newLayer);
 			resolve(newLayer);
+		});
+	},
+	updateLayerInfo: function({commit},data) {
+		return new Promise((resolve,reject) => {
+			if (!data.id) return reject("Layer id is not specified.");
+			const l = _.find(state.data.layers,{id:data.id});
+			if (!l) return reject("Specified layer does not exist.");
+			if (!data.name || data.name.length==0) return reject("Layer name can not be empty.");
+			commit("editLayer",{layer:l,data:data});
+			resolve("Layer info has been updated.");
+		});
+	},
+	removeLayer: function({commit},id) {
+		return new Promise((resolve,reject) => {
+			commit("removeLayer",id);
+			resolve("Layer has been deleted.");
 		});
 	},
 	addShape: function({commit},data) {
@@ -139,6 +161,18 @@ const mutations = {
 	},
 	appendLayer: function(state,data) {
 		state.data.layers.unshift(data);
+	},
+	editLayer: function(state,ar) {
+		if (ar.layer) {
+			ar.layer.name = ar.data.name;
+			ar.layer.visible = ar.data.visible;
+		}
+	},
+	removeLayer: function(state,id) {
+		const i = _.findIndex(state.data.layers,{id:id});
+		if (i===0||i>0) {
+			state.data.layers.splice(i,1);
+		}
 	},
 	addShape: function(state,data) {
 		const l = _.find(state.data.layers,{id:data.layerId});

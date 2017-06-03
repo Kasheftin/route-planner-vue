@@ -45,8 +45,10 @@ export default {
 	},
 	methods: {
 		save: function() {
-			this.$store.commit("project/updateInfo",{name:this.name,description:this.description});
-			this.$bus.$emit("closeModal");
+			this.$store.dispatch("project/updateInfo",{name:this.name,description:this.description}).then((msg) => {
+				this.$bus.$emit("success",msg);
+				this.$bus.$emit("closeModal");
+			}).catch((msg) => this.$bus.$emit("error",msg));
 		}
 	}
 }
