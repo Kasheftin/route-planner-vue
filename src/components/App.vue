@@ -26,7 +26,7 @@
 			</template>
 		</transition>
 		<transition name="rp-modal">
-			<component :is="modalWindowComponent" />
+			<component :is="modalWindowComponent" v-bind="modalWindowProps" />
 		</transition>
 		<Toastr />
 	</div>
@@ -38,7 +38,6 @@ import Manager from "./Manager.vue";
 import Project from "./project/Main.vue";
 import ProjectMarkers from "./project/Markers.vue";
 import ProjectMarkerInfo from "./project/MarkerInfo.vue";
-import ProjectInfoEditor from "./project/InfoEditor.vue";
 import SearchBox from "./search/Box.vue";
 import SearchResults from "./search/Results.vue";
 import SearchDetailedResult from "./search/DetailedResult.vue";
@@ -47,7 +46,8 @@ import Toastr from "./utils/Toastr.vue";
 export default {
 	data: function() {
 		return {
-			modalWindowComponent: undefined
+			modalWindowComponent: undefined,
+			modalWindowProps: undefined
 		}
 	},
 	computed: {
@@ -61,11 +61,13 @@ export default {
 		})
 	},
 	created: function() {
-		this._switchModal = (name,options) => {
-			this.modalWindowComponent = (this.modalWindowComponent==name?undefined:name);
+		this._switchModal = (nameOrComponent,options) => {
+			this.modalWindowProps = (this.modalWindowComponent==nameOrComponent?undefined:options);
+			this.modalWindowComponent = (this.modalWindowComponent==nameOrComponent?undefined:nameOrComponent);
 		}
 		this._closeModal = () => {
 			this.modalWindowComponent = undefined;
+			this.modalWindowProps = undefined;
 		}
 		this.$bus.$on("switchModal",this._switchModal);
 		this.$bus.$on("closeModal",this._closeModal);
@@ -143,7 +145,6 @@ export default {
 		Project: Project,
 		ProjectMarkers: ProjectMarkers,
 		ProjectMarkerInfo: ProjectMarkerInfo,
-		ProjectInfoEditor: ProjectInfoEditor,
 		SearchBox: SearchBox,
 		SearchResults: SearchResults,
 		SearchDetailedResult: SearchDetailedResult,

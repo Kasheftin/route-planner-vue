@@ -4,6 +4,7 @@ var webpack = require("webpack")
 var cssResources = [
   "node_modules/sass-flex-mixin/_flex.scss",
   "node_modules/bootstrap-sass/assets/stylesheets/bootstrap/_variables.scss",
+  "node_modules/bootstrap-sass/assets/stylesheets/bootstrap/mixins/*.scss",
   "src/stylesheets/resources.scss"
 ];
 

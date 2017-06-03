@@ -23,7 +23,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="rp-modal-buttons">
+			<div class="rp-modal-buttons text-right">
 				<button class="btn btn-primary" @click="save">Save</button>
 				<button class="btn btn-default" @click="$bus.$emit('closeModal')">Cancel</button>
 			</div>

@@ -1,12 +1,15 @@
 <template>
-	<div class="rp-layer" :class="{'-selected':selected,'-invisible':!layer.visible,'-highlighted':highlighted}" @click="trySelectLayer()">
-		<a href="javascript:void(0)" class="rp-layer-header" @click="tryExpandLayer()" :class="{'-inactive':!layer.visible,'-active':selected}">
+	<div class="rp-layer" :class="{'-selected':selected,'-invisible':!layer.visible,'-highlighted':highlighted}" @click="selectLayer()">
+		<a href="javascript:void(0)" class="rp-layer-header" @click="expandLayer()" :class="{'-inactive':!layer.visible,'-active':selected}">
+			<div class="rp-layer-header-expand-icon">
+				<i class="fa" :class="{'fa-plus-square':!layer.expanded,'fa-minus-square':layer.expanded}"></i>
+			</div>
+			<div class="rp-layer-header-title">{{layer.name}}</div>
 			<transition :css="false" @before-enter="iconAnimBeforeEnter" @enter="iconAnimEnter" @leave="iconAnimLeave">
-				<div class="rp-layer-header-expand-icon" v-if="layer.visible">
-					<i class="fa" :class="{'fa-plus-square':!layer.expanded,'fa-minus-square':layer.expanded}"></i>
+				<div class="rp-layer-header-expand-icon" v-if="selected" @click.stop="editLayer">
+					<i class="fa fa-cog"></i>
 				</div>
 			</transition>
-			<div class="rp-layer-header-title">{{layer.name}}</div>
 			<div class="rp-layer-header-visible-icon" @click.stop="switchLayerVisibility">
 				<i class="fa" :class="{'fa-check-square-o':layer.visible,'fa-square-o':!layer.visible}"></i>
 			</div>
@@ -16,7 +19,7 @@
 				<div class="rp-layer-body">
 					<div class="rp-layer-body-empty" v-show="showEmpty" ref="empty">-- Empty --</div>
 					<Draggable class="rp-layer-body-list" :options="{group:'shapes',handle:'.rp-layer-draggable'}" :value="layer.shapes" :move="checkMove" @start="startMove($event)" @end="moveShape($event)" :data-layer-id="layer.id">
-						<a v-for="s in layer.shapes" v-if="s.type=='marker'" href="javascript:void(0)" class="rp-layer-marker rp-layer-draggable" @click="flyToAndToggleMarkerInfo(s.data)">
+						<a v-for="s in layer.shapes" v-if="s.type=='marker'" href="javascript:void(0)" class="rp-layer-marker rp-layer-draggable" @click="flyToAndShowMarkerInfo(s.data)">
 							<i class="rp-layer-marker-icon" :style="{backgroundImage:'url('+s.data.icon+')'}"></i>
 							<span class="rp-layer-marker-text">{{s.data.name}}</span>
 						</a>
@@ -29,6 +32,7 @@
 
 <script>
 import Velocity from "velocity-animate";
+import LayerInfoEditor from "./LayerInfoEditor.vue";
 
 export default {
 	props: ["layer","selected"],
@@ -39,36 +43,24 @@ export default {
 		};
 	},
 	computed: {
-		visible: function() {
-			return this.layer.visible;
-		},
 		showEmpty: function() {
 			if (this.dragging) return false;
 			return this.layer.shapes.length==0;
 		}
 	},
-	watch: {
-		visible: function(v) {
-			if (!v) {
-				this.$store.dispatch("project/contractLayer",this.layer);
-				this.$emit("deselectLayer");
-			}
-		}
-	},
 	methods: {
-		trySelectLayer: function() {
-			if (this.layer.visible) {
-				this.$emit("selectLayer");
-			}
+		selectLayer: function() {
+			this.$emit("selectLayer");
 		},
-		tryExpandLayer: function() {
-			if (this.layer.visible) {
-				this.$store.dispatch("project/switchLayerExpand",this.layer);
-			}
+		expandLayer: function() {
+			this.$store.dispatch("project/switchLayerExpand",this.layer);
 		},
 		switchLayerVisibility: function() {
 			this.$store.dispatch('project/switchLayerVisibility',this.layer);
 			this.$emit("selectLayer");
+		},
+		editLayer: function() {
+			this.$bus.$emit("switchModal",LayerInfoEditor,{layer:this.layer});
 		},
 		iconAnimBeforeEnter: function(el) {
 			el.style.width = 0;
@@ -105,9 +97,9 @@ export default {
 			this.$bus.$emit("shapeDragging",false);
 			this.$store.dispatch("project/moveShape",e);
 		},
-		flyToAndToggleMarkerInfo: function(data) {
+		flyToAndShowMarkerInfo: function(data) {
 			this.$bus.$emit("setMapCenter",data.position);
-			this.$bus.$emit("toggleMarkerInfo",data);
+			this.$bus.$emit("showMarkerInfo",data);
 		}
 	},
 	mounted: function() {

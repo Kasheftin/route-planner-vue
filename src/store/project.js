@@ -18,10 +18,7 @@ const actions = {
 		commit("closeProject");
 	},
 	switchLayerExpand: function({commit},data) {
-		const l = _.find(state.data.layers,{id:data.id});
-		if (l.visible) {
-			commit("switchLayerExpand",data);
-		}
+		commit("switchLayerExpand",data);
 	},
 	contractLayer: function({commit},data) {
 		commit("contractLayer",data);

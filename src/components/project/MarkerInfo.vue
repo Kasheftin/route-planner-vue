@@ -108,12 +108,18 @@ export default {
 				return;
 			}
 			this.r = data;
-			console.log("toggleMarkerInfo",data);
+		}
+		this._showMarkerInfo = (data) => {
+			if (data) {
+				this.r = data;
+			}
 		}
 		this.$bus.$on("toggleMarkerInfo",this._toggleMarkerInfo);
+		this.$bus.$on("showMarkerInfo",this._showMarkerInfo);
 	},
 	beforeDestroy: function() {
 		this.$bus.$off("toggleMarkerInfo",this._toggleMarkerInfo);
+		this.$bus.$off("showMarkerInfo",this._showMarkerInfo);
 	}
 }
 </script>
