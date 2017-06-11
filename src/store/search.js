@@ -1,3 +1,5 @@
+import Vue from "vue";
+
 const state = {
 	results: []
 }
@@ -30,7 +32,7 @@ const actions = {
 
 const mutations = {
 	setResults: function(state,results) {
-		state.results = results;
+		Vue.set(state,"results",results);
 	},
 	appendResults: function(state,results) {
 		const map = {};

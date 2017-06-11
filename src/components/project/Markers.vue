@@ -21,7 +21,7 @@ export default {
 				if (l.visible && l.shapes.length>0) {
 					l.shapes.forEach((s) => {
 						if (s.type=="marker") {
-							data.push(s.data);
+							data.push(s);
 						}
 					})
 				}

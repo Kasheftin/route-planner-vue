@@ -42,7 +42,6 @@
 </template>
 
 <script>
-import Velocity from "velocity-animate";
 import Marked from "marked";
 
 export default {
@@ -58,7 +57,7 @@ export default {
 			return {
 				pixelOffset: {
 					width: 0,
-					height: -30
+					height: -10
 				}
 			}
 		},
@@ -84,25 +83,17 @@ export default {
 			this.editing = false;
 		},
 		save: function() {
-			this.$store.dispatch("project/updateShapeNote",{id:this.r.id,note:this.note});
-			this.note = "";
-			this.editing = false;
+			this.$store.dispatch("project/updateShapeNotePromise",{id:this.r.id,note:this.note}).then((msg) => {
+				this.note = "";
+				this.editing = false;
+				this.$bus.$emit("success",msg);
+			}).catch((msg) => this.$bus.$emit("error",msg));
 		},
 		remove: function() {
-			this.$store.dispatch("project/removeShape",this.r.id);
-			this.r = undefined;
-		},
-		animBeforeEnter: function(el) {
-			el.style.height = 0;
-		},
-		animEnter: function(el,done) {
-			Velocity(el,{height:$(el).children().eq(0).outerHeight(true)},{duration:300,complete:() => {
-				el.style.height = "auto";
-				done();
-			}});
-		},
-		animLeave: function(el,done) {
-			Velocity(el,{height:0},{duration:300,complete:done});
+			this.$store.dispatch("project/removeShapePromise",this.r.id).then((msg) => {
+				this.r = undefined;
+				this.$bus.$emit("success",msg);
+			}).catch((msg) => this.$bus.$emit("error",msg));
 		}
 	},
 	mounted: function() {

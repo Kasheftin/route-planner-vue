@@ -45,7 +45,7 @@ export default {
 			this.selectedLayerId = id;
 		},
 		addLayer: function() {
-			this.$store.dispatch("project/addLayer",{expanded:true}).then((newLayer) => {
+			this.$store.dispatch("project/addLayerPromise",{expanded:true}).then((newLayer) => {
 				this.selectLayer(newLayer.id);
 			});
 		},
@@ -75,7 +75,7 @@ export default {
 		}
 
 		this._tryAddSearchResult = (r,callback) => {
-			this.$store.dispatch("project/addShape",{layerId:this.selectedLayerId,type:"marker",data:r}).then((msg) => {
+			this.$store.dispatch("project/addShapePromise",{layerId:this.selectedLayerId,type:"marker",data:r}).then((msg) => {
 				this.$bus.$emit("success",msg);
 				this.$bus.$emit("highlightLayer",this.selectedLayerId);
 				callback && callback("success");
@@ -85,14 +85,33 @@ export default {
 			});
 			this._updateLayersHeight();
 		}
+		this._tryAddDot = (data,callback) => {
+			this.$store.dispatch("project/addShapePromise",{layerId:this.selectedLayerId,type:"dot",data:data}).then((msg) => {
+				this.$bus.$emit("success",msg);
+				this.$bus.$emit("highlightLayer",this.selectedLayerId);
+				callback && callback("success");
+			}).catch((msg) => {
+				this.$bus.$emit("error",msg);
+				callback && callback("error");
+			});
+		}
+		this._layerRemoved = (id) => {
+			if (this.selectedLayerId==id) {
+				this.selectedLayerId = undefined;
+			}
+		}
 		this.$bus.$on("tryAddSearchResult",this._tryAddSearchResult);
+		this.$bus.$on("tryAddDot",this._tryAddDot);
+		this.$bus.$on("layerRemoved",this._layerRemoved);
 	},
 	beforeDestroy: function() {
 		this._tryAddSearchResult && this.$bus.$off("tryAddSearchResult",this._tryAddSearchResult);
+		this._tryAddDot && this.$bus.$off("tryAddDot",this._tryAddDot);
+		this._layerRemoved && this.$bus.$off("layerRemoved",this._layerRemoved);
 		this._updateLayersHeight && $(window).off("resize",this._updateLayersHeight);
 	},
 	components: {
-		Layer: Layer
+		Layer
 	}
 }
 

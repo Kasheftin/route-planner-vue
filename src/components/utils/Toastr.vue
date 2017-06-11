@@ -48,6 +48,8 @@ export default {
 	created: function() {
 		const cn = (message,type) => {
 			this.notifications.push({type:type,css:(type=="error"?"danger":type),message:message,created:(new Date).getTime(),show:true,pinned:false,key:Math.random()});
+			if (type=="error") console.error(message);
+			else if (type=="success") console.log(message);
 		}
 		this._se = (message) => cn(message,"error");
 		this._ss = (message) => cn(message,"success");

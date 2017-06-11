@@ -39,6 +39,7 @@ import Manager from "./Manager.vue";
 import Project from "./project/Main.vue";
 import ProjectMarkers from "./project/Markers.vue";
 import ProjectMarkerInfo from "./project/MarkerInfo.vue";
+import ProjectDotInfo from "./project/DotInfo.vue";
 import SearchBox from "./search/Box.vue";
 import SearchResults from "./search/Results.vue";
 import SearchDetailedResult from "./search/DetailedResult.vue";
@@ -72,7 +73,7 @@ export default {
 			}
 		},
 		tool: function(tool) {
-			console.log("tool",tool);
+			this.map && this.map.setOptions({draggableCursor:tool=="marker"?"crosshair":null});
 		}
 	},
 	created: function() {
@@ -86,7 +87,6 @@ export default {
 		}
 		this.$bus.$on("switchModal",this._switchModal);
 		this.$bus.$on("closeModal",this._closeModal);
-		this.$promises.register("mapReady");
 	},
 	mounted: function() {
 		navigator.geolocation && navigator.geolocation.getCurrentPosition(position => {
@@ -125,6 +125,13 @@ export default {
 					e.stop();
 					this.$bus.$emit("toggleDetailedResult",e.placeId,"poi");
 				}
+				else if (this.tool=="marker") {
+					this.$bus.$emit("tryAddDot",e,(resultType) => {
+						if (resultType=="success") {
+							this.$bus.$emit("toggleDotInfo");
+						}
+					});
+				}
 			});
 			this._setMapBounds = (results) => {
 				const bounds = new google.maps.LatLngBounds();
@@ -150,21 +157,21 @@ export default {
 		["switchModal","closeModal","setMapBounds","setMapCenter"].forEach((f) => {
 			this.hasOwnProperty("_"+f) && this.$bus.$off(f,this["_"+f]);
 		});
-		this.$promises.unregister("mapReady");
 	},
 	destroyed: function() {
 		this.$promises.unregister("mapReady");
 	},
 	components: {
-		Manager: Manager,
-		Project: Project,
-		ProjectMarkers: ProjectMarkers,
-		ProjectMarkerInfo: ProjectMarkerInfo,
-		SearchBox: SearchBox,
-		SearchResults: SearchResults,
-		SearchDetailedResult: SearchDetailedResult,
-		ToolBox: ToolBox,
-		Toastr: Toastr
+		Manager,
+		Project,
+		ProjectMarkers,
+		ProjectMarkerInfo,
+		ProjectDotInfo,
+		SearchBox,
+		SearchResults,
+		SearchDetailedResult,
+		ToolBox,
+		Toastr
 	}
 }
 </script>

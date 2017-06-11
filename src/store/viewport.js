@@ -1,3 +1,4 @@
+import Vue from "vue";
 import config from "../config";
 
 const STORAGE_KEY = "rp-viewport";

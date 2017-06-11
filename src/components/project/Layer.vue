@@ -19,10 +19,20 @@
 				<div class="rp-layer-body">
 					<div class="rp-layer-body-empty" v-show="showEmpty" ref="empty">-- Empty --</div>
 					<Draggable class="rp-layer-body-list" :options="{group:'shapes',handle:'.rp-layer-draggable'}" :value="layer.shapes" :move="checkMove" @start="startMove($event)" @end="moveShape($event)" :data-layer-id="layer.id">
-						<a v-for="s in layer.shapes" v-if="s.type=='marker'" href="javascript:void(0)" class="rp-layer-marker rp-layer-draggable" @click="flyToAndShowMarkerInfo(s.data)">
-							<i class="rp-layer-marker-icon" :style="{backgroundImage:'url('+s.data.icon+')'}"></i>
-							<span class="rp-layer-marker-text">{{s.data.name}}</span>
-						</a>
+						<template v-for="s in layer.shapes">
+							<template v-if="s.type=='marker'">
+								<a href="javascript:void(0)" class="rp-layer-marker rp-layer-draggable" @click="flyToAndShowMarkerInfo(s)">
+									<i class="rp-layer-marker-icon" :style="{backgroundImage:'url('+s.icon+')'}"></i>
+									<span class="rp-layer-marker-text">{{s.name}}</span>
+								</a>
+							</template>
+							<template v-if="s.type=='dot'">
+								<a href="javascript:void(0)" class="rp-layer-marker rp-layer-draggable" @click="flyToAndShowDotInfo(s)">
+									<i class="rp-layer-marker-icon" :style="{backgroundImage:'url('+s.icon+')'}"></i>
+									<span class="rp-layer-marker-text">{{s.name}}</span>
+								</a>
+							</template>
+						</template>
 					</Draggable>
 				</div>
 			</div>
@@ -100,6 +110,10 @@ export default {
 		flyToAndShowMarkerInfo: function(data) {
 			this.$bus.$emit("setMapCenter",data.position);
 			this.$bus.$emit("showMarkerInfo",data);
+		},
+		flyToAndShowDotInfo: function(data) {
+			this.$bus.$emit("setMapCenter",data.position);
+			this.$bus.$emit("showDotInfo",data);
 		}
 	},
 	mounted: function() {

@@ -1,3 +1,4 @@
+import Vue from "vue";
 
 const DEFAULT_TOOL = "hand";
 
@@ -13,7 +14,7 @@ const actions = {
 
 const mutations = {
 	setTool: function(state,name) {
-		state.name = name||DEFAULT_TOOL;
+		Vue.set(state,"name",name||DEFAULT_TOOL);
 	}
 }
 

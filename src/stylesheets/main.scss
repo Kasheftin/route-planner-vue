@@ -91,7 +91,6 @@ html,body,.rp-container,.vue-map-container {
 	float: right;
 	a {
 		@include linkcontrol;
-		padding-left: 4px;
 	}
 }
 
@@ -163,6 +162,9 @@ html,body,.rp-container,.vue-map-container {
 	.rp-search {
 		transform: translateX(-100%);
 	}
+	.rp-tools {
+		transform: translateX(-100%);
+	}
 }
 .rp-modal-leave-to {
 	opacity: 0;
@@ -173,6 +175,9 @@ html,body,.rp-container,.vue-map-container {
 		transform: translateY(-50px);
 	}
 	.rp-search {
+		transform: translateX(-100%);
+	}
+	.rp-tools {
 		transform: translateX(-100%);
 	}
 }
