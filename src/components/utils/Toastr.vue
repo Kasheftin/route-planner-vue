@@ -2,8 +2,8 @@
 	<transition-group name="rp-toastrs" tag="div" class="rp-toastrs" :css="false" @before-enter="beforeEnter" @enter="enter" @leave="leave">
 		<div class="rp-toastr-container" v-for="(n,i) in notifications" :key="n.key">
 			<div class="rp-toastr alert" :class="'alert-'+n.css">
-				<button type="button" class="close fa fa-times" @click="close(i,$event)"></button>
-				<button type="button" class="close fa fa-thumb-tack" v-if="!n.pinned" @click="n.pinned=true"></button>
+				<button type="button" class="close icon-times" @click="close(i,$event)"></button>
+				<button type="button" class="close icon-pin" v-if="!n.pinned" @click="n.pinned=true"></button>
 				{{n.message}}
 			</div>
 		</div>
@@ -99,6 +99,8 @@ export default {
 	pointer-events: auto;
 	.close {
 		margin-left: 5px;
+		font-size: 14px;
+		line-height: 14px;
 	}
 }
 

@@ -3,7 +3,7 @@
 		<div class="rp-modal">
 			<div class="rp-modal-header">
 				<div class="rp-rcontrols">
-					<a class="fa fa-times" href="javascript:void(0)" @click="$bus.$emit('closeModal')"></a>
+					<a class="icon-times" href="javascript:void(0)" @click="$bus.$emit('closeModal')"></a>
 				</div>
 				<h4>Project Settings</h4>
 			</div>

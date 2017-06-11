@@ -3,6 +3,7 @@ import * as VueGoogleMaps from "vue2-google-maps";
 
 import "./vendors";
 import "./stylesheets/main.scss";
+import "./stylesheets/icons/css/fontello-embedded.css";
 import App from "./components/App.vue";
 import PromisesBus from "./utils/PromisesBus";
 import Draggable from "vuedraggable";

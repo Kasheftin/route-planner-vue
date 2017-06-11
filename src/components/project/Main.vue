@@ -2,9 +2,9 @@
 	<div class="rp-settings">
 		<div class="rp-settings-inner">
 			<div class="rp-rcontrols">
-				<a class="fa fa-save" href="javascript:void(0)" @click="saveProject"></a>
-				<a class="fa fa-cog" href="javascript:void(0)" @click="editProject"></a>
-				<a class="fa fa-times" href="javascript:void(0)" @click="closeProject"></a>
+				<a class="icon-save" href="javascript:void(0)" @click="saveProject"></a>
+				<a class="icon-cog" href="javascript:void(0)" @click="editProject"></a>
+				<a class="icon-times" href="javascript:void(0)" @click="closeProject"></a>
 			</div>
 			<h4>{{name}}</h4>
 			<p v-if="description">{{description}}</p>

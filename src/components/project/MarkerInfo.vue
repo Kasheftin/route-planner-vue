@@ -25,16 +25,16 @@
 				<div class="alert alert-info" v-html="compiledNote"></div>
 			</div>
 			<div class="rp-iwin-note-editor" v-if="editing">
-				<textarea class="form-control" v-model="note" rows="5"></textarea>
+				<textarea class="form-control" v-model="note" rows="5" ref="note"></textarea>
 			</div>
 			<p class="rp-iwin-actions" v-if="!editing">
-				<a class="rp-iwin-action btn btn-primary btn-sm" href="javascript:void(0)" @click="edit()"><i class="fa fa-pencil"></i> {{r.note?"Edit Note":"Add Note"}}</a>
-				<a class="rp-iwin-action btn btn-default btn-sm" href="javascript:void(0)" @click="remove()"><i class="fa fa-trash"></i> Delete</a>
+				<a class="rp-iwin-action btn btn-primary btn-sm" href="javascript:void(0)" @click="edit()"><span class="icon-pencil"></span> {{r.note?"Edit Note":"Add Note"}}</a>
+				<a class="rp-iwin-action btn btn-default btn-sm" href="javascript:void(0)" @click="remove()"><span class="icon-times"></span> Delete</a>
 				<a class="rp-iwin-action" v-if="!!r.url" :href="r.url" target="_blank">View on Google Maps</a>
 			</p>
 			<p class="rp-iwin-actions" v-if="editing">
-				<a class="rp-iwin-action btn btn-primary btn-sm" href="javascript:void(0)" @click="save()"><i class="fa fa-check"></i> Save</a>
-				<a class="rp-iwin-action btn btn-default btn-sm" href="javascript:void(0)" @click="cancel()"><i class="fa fa-times"></i> Cancel</a>
+				<a class="rp-iwin-action btn btn-primary btn-sm" href="javascript:void(0)" @click="save()"><span class="icon-checkmark"></span> Save</a>
+				<a class="rp-iwin-action btn btn-default btn-sm" href="javascript:void(0)" @click="cancel()"><span class="icon-times"></span> Cancel</a>
 				<a class="rp-iwin-action" href="https://en.wikipedia.org/wiki/Markdown" target="_blank">Markdown supported</a>
 			</p>
 		</div>
@@ -74,6 +74,10 @@ export default {
 		edit: function() {
 			this.note = this.r.note;
 			this.editing = true;
+			this.$nextTick(() => {
+				console.log(this.$refs);
+				this.$refs.note.focus();
+			});
 		},
 		cancel: function() {
 			this.note = "";

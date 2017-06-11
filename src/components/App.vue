@@ -18,6 +18,7 @@
 			<div v-if="projectInitialized">
 				<Project />
 				<SearchBox />
+				<ToolBox />
 			</div>
 		</transition>
 		<transition name="rp-modal">
@@ -41,6 +42,7 @@ import ProjectMarkerInfo from "./project/MarkerInfo.vue";
 import SearchBox from "./search/Box.vue";
 import SearchResults from "./search/Results.vue";
 import SearchDetailedResult from "./search/DetailedResult.vue";
+import ToolBox from "./tools/Box.vue";
 import Toastr from "./utils/Toastr.vue";
 
 export default {
@@ -58,7 +60,20 @@ export default {
 		}),
 		...mapState("project",{
 			projectInitialized: state => state.initialized
+		}),
+		...mapState("tool",{
+			tool: state => state.name
 		})
+	},
+	watch: {
+		projectInitialized: function(b) {
+			if (!b) {
+				this.$store.dispatch("tool/setTool");
+			}
+		},
+		tool: function(tool) {
+			console.log("tool",tool);
+		}
 	},
 	created: function() {
 		this._switchModal = (nameOrComponent,options) => {
@@ -148,6 +163,7 @@ export default {
 		SearchBox: SearchBox,
 		SearchResults: SearchResults,
 		SearchDetailedResult: SearchDetailedResult,
+		ToolBox: ToolBox,
 		Toastr: Toastr
 	}
 }

@@ -2,16 +2,16 @@
 	<div class="rp-layer" :class="{'-selected':selected,'-invisible':!layer.visible,'-highlighted':highlighted}" @click="selectLayer()">
 		<a href="javascript:void(0)" class="rp-layer-header" @click="expandLayer()" :class="{'-inactive':!layer.visible,'-active':selected}">
 			<div class="rp-layer-header-expand-icon">
-				<i class="fa" :class="{'fa-plus-square':!layer.expanded,'fa-minus-square':layer.expanded}"></i>
+				<span class="icon" :class="{'icon-calcplus':!layer.expanded,'icon-calcminus':layer.expanded}"></span>
 			</div>
 			<div class="rp-layer-header-title">{{layer.name}}</div>
 			<transition :css="false" @before-enter="iconAnimBeforeEnter" @enter="iconAnimEnter" @leave="iconAnimLeave">
 				<div class="rp-layer-header-expand-icon" v-if="selected" @click.stop="editLayer">
-					<i class="fa fa-cog"></i>
+					<span class="icon icon-cog"></span>
 				</div>
 			</transition>
 			<div class="rp-layer-header-visible-icon" @click.stop="switchLayerVisibility">
-				<i class="fa" :class="{'fa-check-square-o':layer.visible,'fa-square-o':!layer.visible}"></i>
+				<span class="icon" :class="{'icon-check':layer.visible,'icon-uncheck':!layer.visible}"></span>
 			</div>
 		</a>
 		<transition :css="false" @before-enter="bodyAnimBeforeEnter" @enter="bodyAnimEnter" @leave="bodyAnimLeave">
@@ -66,7 +66,7 @@ export default {
 			el.style.width = 0;
 		},
 		iconAnimEnter: function(el,done) {
-			Velocity(el,{width:$(el).find(".fa").outerWidth(true)},{duration:300,complete:() => {
+			Velocity(el,{width:$(el).find(".icon").outerWidth(true)},{duration:300,complete:() => {
 				el.style.width = "auto";
 				done();
 			}});
@@ -149,7 +149,7 @@ export default {
 		}
 		&-expand-icon {
 			overflow: hidden;
-			.fa {
+			.icon {
 				margin-right: 5px;
 			}
 		}

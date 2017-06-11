@@ -2,6 +2,11 @@ html,body,.rp-container,.vue-map-container {
 	height: 100%;
 }
 
+[class^="icon-"]:before, [class*=" icon-"]:before {
+	position: relative;
+	top: 2px;
+}
+
 .vue-map-container {
 	position: fixed;
 	top: 0;
@@ -86,8 +91,6 @@ html,body,.rp-container,.vue-map-container {
 	float: right;
 	a {
 		@include linkcontrol;
-		font-size: 17px;
-		line-height: 17px;
 		padding-left: 4px;
 	}
 }
@@ -111,7 +114,6 @@ html,body,.rp-container,.vue-map-container {
 	top: 30px;
 	left: 370px;
 	width: 400px;
-	transform: all 0.3s ease;
 	&-box {
 		@include google-box-overlay;
 		border: 1px solid #ffffff;
@@ -127,6 +129,23 @@ html,body,.rp-container,.vue-map-container {
 		font-size: 17px;
 		line-height: 17px;
 		@include linkcontrol;
+	}
+}
+
+.rp-tools {
+	transition: transform 0.3s ease;
+	position: fixed;
+	top: 70px;
+	left: 370px;
+	.btn {
+		padding: 4px 8px;
+		&.-active {
+			background-color: #e6e6e6;
+			border-color: #adadad;
+		}
+		&:focus {
+			outline: none;
+		}
 	}
 }
 

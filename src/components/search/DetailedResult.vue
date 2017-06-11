@@ -22,7 +22,7 @@
 				<a class="rp-iwin-photo" href="javascript:void(0)" v-for="p in thumbs" @click="" :style="{backgroundImage:'url('+p+')'}"><img class="rp-iwin-photo-img" :src="p" /></a>
 			</div>
 			<p class="rp-iwin-actions">
-				<a class="rp-iwin-action btn btn-primary btn-sm" href="javascript:void(0)" @click="addToProject()"><i class="fa fa-plus"></i> Add to Map</a>
+				<a class="rp-iwin-action btn btn-primary btn-sm" href="javascript:void(0)" @click="addToProject()"><span class="icon-plus"></span> Add to Map</a>
 				<a class="rp-iwin-action" v-if="!!r.url" :href="r.url" target="_blank">View on Google Maps</a>
 			</p>
 		</div>

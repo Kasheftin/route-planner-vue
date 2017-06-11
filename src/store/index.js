@@ -3,6 +3,7 @@ import Vuex from "vuex";
 import project from "./project";
 import viewport from "./viewport";
 import search from "./search";
+import tool from "./tool";
 
 Vue.use(Vuex);
 
@@ -12,7 +13,8 @@ export default new Vuex.Store({
 	modules: {
 		project,
 		viewport,
-		search
+		search,
+		tool
 	},
 	strict: debug
 });
