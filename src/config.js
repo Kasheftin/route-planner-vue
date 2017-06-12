@@ -5,7 +5,7 @@ export default {
 		zoom: 13,
 		mapTypeId: "roadmap"
 	},
-	newProject: {
+	project: {
 		name: "Untitled map",
 		description: "This is sample description",
 		layers: [{
@@ -20,5 +20,9 @@ export default {
 			shapes: []
 		}],
 		selectedLayerId: 0
+	},
+	dot: {
+		icon: "https://mt.googleapis.com/vt/icon/name=icons/spotlight/spotlight-poi.png&scale=1",
+		name: "Untitled marker"
 	}
 };

@@ -74,11 +74,11 @@ export default {
 			this.selectedLayerId = this.layers[0].id;
 		}
 
-		this._tryAddSearchResult = (r,callback) => {
-			this.$store.dispatch("project/addShapePromise",{layerId:this.selectedLayerId,type:"marker",data:r}).then((msg) => {
-				this.$bus.$emit("success",msg);
+		this._tryAddSearchResult = (data,callback) => {
+			this.$store.dispatch("project/addShapePromise",{layerId:this.selectedLayerId,type:"marker",data:data}).then((result) => {
+				this.$bus.$emit("success",result.msg);
 				this.$bus.$emit("highlightLayer",this.selectedLayerId);
-				callback && callback("success");
+				callback && callback("success",result.shape);
 			}).catch((msg) => {
 				this.$bus.$emit("error",msg);
 				callback && callback("error");
@@ -86,10 +86,10 @@ export default {
 			this._updateLayersHeight();
 		}
 		this._tryAddDot = (data,callback) => {
-			this.$store.dispatch("project/addShapePromise",{layerId:this.selectedLayerId,type:"dot",data:data}).then((msg) => {
-				this.$bus.$emit("success",msg);
+			this.$store.dispatch("project/addShapePromise",{layerId:this.selectedLayerId,type:"dot",data:data}).then((result) => {
+				this.$bus.$emit("success",result.msg);
 				this.$bus.$emit("highlightLayer",this.selectedLayerId);
-				callback && callback("success");
+				callback && callback("success",result.shape);
 			}).catch((msg) => {
 				this.$bus.$emit("error",msg);
 				callback && callback("error");

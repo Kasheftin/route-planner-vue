@@ -83,9 +83,8 @@ export default {
 			this.editing = false;
 		},
 		save: function() {
-			this.$store.dispatch("project/updateShapeNotePromise",{id:this.r.id,note:this.note}).then((msg) => {
-				this.note = "";
-				this.editing = false;
+			this.$store.dispatch("project/updateMarkerNotePromise",{id:this.r.id,note:this.note}).then((msg) => {
+				this.cancel();
 				this.$bus.$emit("success",msg);
 			}).catch((msg) => this.$bus.$emit("error",msg));
 		},
@@ -97,24 +96,25 @@ export default {
 		}
 	},
 	mounted: function() {
-		this._toggleMarkerInfo = (data) => {
+		this._toggle = (data) => {
 			if (!data || (this.r && this.r.id==data.id)) {
 				this.r = undefined;
+				this.editing = false;
 				return;
 			}
 			this.r = data;
 		}
-		this._showMarkerInfo = (data) => {
+		this._show = (data) => {
 			if (data) {
 				this.r = data;
 			}
 		}
-		this.$bus.$on("toggleMarkerInfo",this._toggleMarkerInfo);
-		this.$bus.$on("showMarkerInfo",this._showMarkerInfo);
+		this.$bus.$on("toggleMarkerInfo",this._toggle);
+		this.$bus.$on("showMarkerInfo",this._show);
 	},
 	beforeDestroy: function() {
-		this.$bus.$off("toggleMarkerInfo",this._toggleMarkerInfo);
-		this.$bus.$off("showMarkerInfo",this._showMarkerInfo);
+		this.$bus.$off("toggleMarkerInfo",this._toggle);
+		this.$bus.$off("showMarkerInfo",this._show);
 	}
 }
 </script>

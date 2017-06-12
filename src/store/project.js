@@ -71,16 +71,28 @@ const prepareDotData = function(data) {
 		type: "dot",
 		name: "",
 		text: ""
-	},data);
+	},config.dot,data);
 	if (data.latLng) {
 		out.position = {lat:data.latLng.lat(),lng:data.latLng.lng()};
 	}
-	return _.pick(out,"id","type","name","text","position");
+	return _.pick(out,"id","type","name","text","position","icon");
+}
+
+const findShape = function(id,type,action) {
+	let cnt = 0;
+	state.data.layers.forEach((l) => {
+		let s = _.find(l.shapes,{id:id,type:type});
+		if (s) {
+			action(s);
+			cnt++;
+		}
+	});
+	return cnt;
 }
 
 const actions = {
 	create: function({commit}) {
-		commit("setProject",prepareProjectData(config.newProject));
+		commit("setProject",prepareProjectData(config.project));
 	},
 	close: function({commit}) {
 		commit("closeProject");
@@ -143,7 +155,7 @@ const actions = {
 			if (!l) return reject("Failed adding new shape, specified layer does not exist.");
 			const shape = prepareShapeData(data.type,data.data);
 			commit("addShape",{layer:l,shape:shape});
-			return resolve("Shape has been added to the project.",shape);
+			return resolve({msg:"Shape has been added to the project.",shape:shape});
 		});
 	},
 	removeShapePromise: function({commit},id) {
@@ -161,29 +173,41 @@ const actions = {
 			else reject("Shape not found.");
 		});
 	},
-	updateShapeNotePromise: function({commit},data) {
+	updateMarkerNotePromise: function({commit},data) {
 		return new Promise((resolve,reject) => {
-			let cnt = 0;
-			console.log("here1");
-			state.data.layers.forEach((l) => {
-				console.log("here",l);
-				let s = _.find(l.shapes,{id:data.id});
-				if (s) {
-					commit("updateShapeNote",{shape:s,note:data.note});
-					cnt++;
-				}
+			const cnt = findShape(data.id,"dot",(s) => {
+				commit("updateMarkerNote",{shape:s,note:data.note});
 			});
-			console.log("updateShapeNotePromise",data,cnt);
-			if (cnt==1) return resolve("Shape note has been updated.");
-			else if (cnt>1) return resolve("Shape note has been updated, but incorrect shape doubles found in different layers.");
-			else reject("Shape not found.");
+			if (cnt==1) return resolve("Marker note has been updated.");
+			else if (cnt>1) return resolve("Marker note has been updated, but incorrect marker doubles found in different layers.");
+			else reject("Marker not found.");
+		});
+	},
+	updateDotDataPromise: function({commit},data) {
+		return new Promise((resolve,reject) => {
+			const cnt = findShape(data.id,"dot",(s) => {
+				commit("updateDotData",{shape:s,name:data.name,text:data.text});
+			});
+			if (cnt==1) return resolve("Marker data has been updated.");
+			else if (cnt>1) return resolve("Marker data has been updated, but incorrect marker doubles found in different layers.");
+			else reject("Marker not found.");
+		});
+	},
+	updateDotPositionPromise: function({commit},data) {
+		return new Promise((resolve,reject) => {
+			const cnt = findShape(data.id,"dot",(s) => {
+				commit("updateDotPosition",{shape:s,position:{lat:data.latLng.lat(),lng:data.latLng.lng()}});
+			});
+			if (cnt==1) return resolve("Marker data has been updated.");
+			else if (cnt>1) return resolve("Marker data has been updated, but incorrect marker doubles found in different layers.");
+			else reject("Marker not found.");
 		});
 	},
 	moveShape: function({commit},e) {
 		const layerFrom = _.find(state.data.layers,{id:e.from.dataset.layerId});
 		const layerTo = _.find(state.data.layers,{id:e.to.dataset.layerId});
 		if (layerFrom && layerTo) {
-			commit("moveShape",{layerFrom:layerFrom,layerTo:layerTo,fromIndex:e.fromIndex,toIndex:e.toIndex});
+			commit("moveShape",{layerFrom:layerFrom,layerTo:layerTo,oldIndex:e.oldIndex,newIndex:e.newIndex});
 		}
 	}
 }
@@ -229,8 +253,15 @@ const mutations = {
 	removeShapeFromLayerByIndex: function(state,data) {
 		data.layer.shapes.splice(data.index,1);
 	},
-	updateShapeNote: function(state,data) {
+	updateMarkerNote: function(state,data) {
 		Vue.set(data.shape,"note",data.note);
+	},
+	updateDotData: function(state,data) {
+		Vue.set(data.shape,"name",data.name);
+		Vue.set(data.shape,"text",data.text);
+	},
+	updateDotPosition: function(state,data) {
+		Vue.set(data.shape,"position",data.position);
 	},
 	moveShape: function(state,e) {
 		e.layerTo.shapes.splice(e.newIndex,0,e.layerFrom.shapes.splice(e.oldIndex,1)[0]);

@@ -1,4 +1,4 @@
-<template>
+f<template>
 	<div class="rp-container">
 		<gmap-map
 			:center="center"
@@ -13,6 +13,7 @@
 			<SearchDetailedResult />
 			<ProjectMarkers v-if="projectInitialized" />
 			<ProjectMarkerInfo />
+			<ProjectDotInfo />
 		</gmap-map>
 		<transition name="rp-modal">
 			<div v-if="projectInitialized">
@@ -126,9 +127,11 @@ export default {
 					this.$bus.$emit("toggleDetailedResult",e.placeId,"poi");
 				}
 				else if (this.tool=="marker") {
-					this.$bus.$emit("tryAddDot",e,(resultType) => {
+					this.$bus.$emit("tryAddDot",e,(resultType,shape) => {
+						console.log("tryAddDot",resultType,shape);
 						if (resultType=="success") {
-							this.$bus.$emit("toggleDotInfo");
+							this.$store.dispatch("tool/setTool");
+							this.$bus.$emit("showDotInfo",shape,true);
 						}
 					});
 				}
