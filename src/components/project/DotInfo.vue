@@ -13,6 +13,19 @@
 					<textarea class="form-control" v-model="text" rows="5" ref="text" placeholder="Marker description"></textarea>
 				</div>
 			</div>
+			<p class="rp-iwin-param" v-if="r.position">
+				<span class="rp-iwin-param-field">Location: </span>
+				<span class="rp-iwin-param-value">{{r.position|latlng}}</span>
+			</p>
+			<p class="rp-iwin-param" v-if="r.position">
+				<span class="rp-iwin-param-field">What is here: </span>
+				<span class="rp-iwin-param-value">
+					<span v-if="r.geocode.loading">Loading...</span>
+					<span v-else-if="r.geocode.status==2">No result</span>
+					<span v-else-if="r.geocode.status==1">{{r.geocode.data}}</span>
+					<span v-else>lala</span>
+				</span>
+			</p>
 			<p class="rp-iwin-actions" v-if="!editing">
 				<a class="rp-iwin-action btn btn-primary btn-sm" href="javascript:void(0)" @click="edit()"><span class="icon-pencil"></span> Edit</a>
 				<a class="rp-iwin-action btn btn-default btn-sm" href="javascript:void(0)" @click="remove()"><span class="icon-times"></span> Delete</a>

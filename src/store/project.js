@@ -66,16 +66,21 @@ const prepareMarkerData = function(data) {
 }
 
 const prepareDotData = function(data) {
-	const out = _.extend({
+	const out = _.extend(true,{
 		id: (new ObjectID).toString(),
 		type: "dot",
 		name: "",
-		text: ""
+		text: "",
+		geocode: {
+			loading: false,
+			status: 0,
+			data: ""
+		}
 	},config.dot,data);
 	if (data.latLng) {
 		out.position = {lat:data.latLng.lat(),lng:data.latLng.lng()};
 	}
-	return _.pick(out,"id","type","name","text","position","icon");
+	return _.pick(out,"id","type","name","text","position","icon","geocode");
 }
 
 const findShape = function(id,type,action) {
@@ -203,6 +208,11 @@ const actions = {
 			else reject("Marker not found.");
 		});
 	},
+	setDotGeocode: function({commit},data) {
+		const cnt = findShape(data.id,"dot",(s) => {
+			commit("setDotGeocode",{shape:s,geocode:_.pick(data,"loading","data","status")});
+		});
+	},
 	moveShape: function({commit},e) {
 		const layerFrom = _.find(state.data.layers,{id:e.from.dataset.layerId});
 		const layerTo = _.find(state.data.layers,{id:e.to.dataset.layerId});
@@ -262,6 +272,13 @@ const mutations = {
 	},
 	updateDotPosition: function(state,data) {
 		Vue.set(data.shape,"position",data.position);
+	},
+	setDotGeocode: function(state,data) {
+		_.each(data.geocode,(v,i) => {
+			if (data.shape.geocode.hasOwnProperty(i)) {
+				Vue.set(data.shape.geocode,i,v);
+			}
+		});
 	},
 	moveShape: function(state,e) {
 		e.layerTo.shapes.splice(e.newIndex,0,e.layerFrom.shapes.splice(e.oldIndex,1)[0]);

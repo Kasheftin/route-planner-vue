@@ -132,6 +132,7 @@ export default {
 						if (resultType=="success") {
 							this.$store.dispatch("tool/setTool");
 							this.$bus.$emit("showDotInfo",shape,true);
+							this.$bus.$emit("updateDotGeocode",shape);
 						}
 					});
 				}
@@ -151,8 +152,24 @@ export default {
 			this._setMapCenter = (center) => {
 				this.map.panTo(center);
 			}
+			this._updateDotGeocode = (shape,mode) => {
+				if ((shape.geocode.status==0||mode=="coordsUpdated") && !shape.geocode.loading && shape.position) {
+					this.$store.dispatch("project/setDotGeocode",{id:shape.id,loading:true});
+					const geocoder = new google.maps.Geocoder;
+					geocoder.geocode({location:shape.position},(results,status) => {
+						if (status=="OK" && results.length>0) {
+							this.$store.dispatch("project/setDotGeocode",{id:shape.id,status:1,data:results[0].formatted_address});
+						}
+						else {
+							this.$store.dispatch("project/setDotGeocode",{id:shape.id,status:2,data:""});
+						}
+						this.$store.dispatch("project/setDotGeocode",{id:shape.id,loading:false});
+					});
+				}
+			}
 			this.$bus.$on("setMapBounds",this._setMapBounds);
 			this.$bus.$on("setMapCenter",this._setMapCenter);
+			this.$bus.$on("updateDotGeocode",this._updateDotGeocode);
 			this.$promises.resolve("mapReady",this.map);
 		});
 	},

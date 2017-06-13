@@ -52,6 +52,7 @@ export default {
 		updateDotPosition: function(shape,data) {
 			data.id = shape.id;
 			this.$store.dispatch("project/updateDotPositionPromise",data).then((msg) => {
+				this.$bus.$emit("updateDotGeocode",shape,"coordsUpdated");
 				this.$bus.$emit("success",msg);
 			}).catch((msg) => this.$bus.$emit("error",msg));
 		}
