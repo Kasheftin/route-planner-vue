@@ -55,7 +55,7 @@ export default {
 	},
 	methods: {
 		addToProject: function() {
-			this.$bus.$emit("tryAddSearchResult",this.r,(resultType) => {
+			this.$bus.$emit("tryAdd","marker",this.r,(resultType) => {
 				if (resultType=="success") {
 					this.$bus.$emit("toggleDetailedResult");
 				}

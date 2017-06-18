@@ -6,7 +6,7 @@
 				<p class="lead">Simple free tool for planning routes</p>
 				<p>It's the clone of my original Route Planner that was written to deeply understand vue.js.</p>
 				<div class="rp-welcome-buttons">
-					<button class="btn btn-default" @click="createProject">Create New Project</button>
+					<button class="btn btn-default" @click="openNewProject">Create New Project</button>
 					<button class="btn btn-default">Load Project</button>
 					<button class="btn btn-default">Import Project JSON</button>
 				</div>
@@ -22,8 +22,8 @@ import {mapActions} from "vuex";
 export default {
 	name: "ProjectManager",
 	methods: {
-		...mapActions({
-			"createProject": "project/create"
+		...mapActions("project",{
+			"openNewProject": "openNewProject"
 		})
 	}
 }

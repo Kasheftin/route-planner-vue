@@ -55,18 +55,17 @@ export default {
 	},
 	methods: {
 		save: function() {
-			this.$store.dispatch("project/updateLayerInfoPromise",{id:(this.layer||{}).id,name:this.name,visible:this.visible}).then((msg) => {
-				this.$bus.$emit("success",msg);
+			this.$store.dispatch("project/setLayerData",{id:(this.layer||{}).id,name:this.name,visible:this.visible}).then(result => {
+				this.$bus.$emit("success",result.msg);
 				this.$bus.$emit("closeModal");
-			}).catch((msg) => this.$bus.$emit("error",msg));
+			}).catch(result => this.$bus.$emit("error",result.msg));
 		},
 		remove: function() {
-			const id = (this.layer||{}).id;
-			this.$store.dispatch("project/removeLayerPromise",(this.layer||{}).id).then((msg) => {
-				this.$bus.$emit("success",msg);
+			this.$store.dispatch("project/removeLayer",this.layer).then(result => {
+				this.$bus.$emit("success",result.msg);
 				this.$bus.$emit("closeModal");
-				this.$bus.$emit("layerRemoved",id);
-			}).catch((msg) => this.$bus.$emit("error",msg));
+				this.$bus.$emit("layerRemoved",result.id);
+			}).catch(result => this.$bus.$emit("error",result.msg));
 		}
 	}
 }

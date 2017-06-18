@@ -1,7 +1,7 @@
 <template>
 	<div class="rp-search">
 		<input class="rp-search-box form-control" type="text" ref="searchbox" v-model="query">
-		<a href="javascript:void(0)" class="icon-times" v-if="query.length>0" @click="query=''"></a>
+		<a class="rp-search-box-close icon-times" href="javascript:void(0)" v-if="query.length>0" @click="query=''"></a>
 	</div>
 </template>
 

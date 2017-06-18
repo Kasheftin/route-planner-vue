@@ -46,6 +46,10 @@ html,body,.rp-container,.vue-map-container {
 		@include clearfix;
 		padding: 15px;
 		border-top: 1px solid #e5e5e5;
+		&-text {
+			padding-top: 7px;
+			display: inline-block;
+		}
 	}
 	width: 100%;
 	@media(min-width:600px) {
@@ -107,6 +111,35 @@ html,body,.rp-container,.vue-map-container {
 	padding-bottom: 0;
 }
 
+.rp-toastrs {
+	position: fixed;
+	z-index: 3;
+	bottom: 10px;
+	left: 0;
+	right: 0;
+	width: 100%;
+	pointer-events: none;
+	@include flexbox();
+	@include flex-direction(column);
+	@include align-items(center);
+}
+
+.rp-toastr-container {
+	margin: 0 auto;
+	max-width: 80%;
+}
+
+.rp-toastr {
+	@include google-box-overlay;
+	margin: 10px 0;
+	pointer-events: auto;
+	.close {
+		margin-left: 5px;
+		font-size: 14px;
+		line-height: 14px;
+	}
+}
+
 .rp-search {
 	transition: transform 0.3s ease;
 	position: fixed;
@@ -120,14 +153,12 @@ html,body,.rp-container,.vue-map-container {
 			box-shadow: inset 0 1px 1px rgba(0,0,0,0.075), 0 0 8px rgba(102,175,233,0.6);
 			border-color: #66afe9;
 		}
-	}
-	.fa {
-		position: absolute;
-		top: 8px;
-		right: 8px;
-		font-size: 17px;
-		line-height: 17px;
-		@include linkcontrol;
+		&-close {
+			position: absolute;
+			top: 9px;
+			right: 9px;
+			@include linkcontrol;
+		}
 	}
 }
 
@@ -229,5 +260,80 @@ html,body,.rp-container,.vue-map-container {
 	}
 	&-note,&-note-editor {
 		margin-bottom: 12px;
+	}
+}
+
+.rp-layer {
+	border-top: 1px solid #e5e5e5;
+	border-left: 4px solid transparent;
+	padding: 10px;
+	padding-left: 6px;
+	background-color: #ffffff;
+	font-size: 13px;
+	transition: all 0.3s ease;
+	&.-selected {
+		border-left-color: #4d90fe;
+	}
+	&.-highlighted {
+		background-color: $state-info-bg;
+	}
+	&-header {
+		@include flexbox;
+		@include linkcontrol;
+		&-title {
+			@include flex-grow(1);
+		}
+		&-expand-icon {
+			overflow: hidden;
+			.icon {
+				margin-right: 5px;
+			}
+		}
+	}
+	&-body-container {
+		overflow: hidden;
+	}
+	&-body {
+		border-top: 1px dotted #e5e5e5;
+		padding: 8px 0;
+		margin-top: 5px;
+		margin-left: 15px;
+		position: relative;
+		&-empty {
+			padding: 5px;
+			position: absolute;
+			top: 8px;
+			left: 0;
+			right: 0;
+			z-index: 1;
+		}
+		&-list {
+			min-height: 30px;
+			position: relative;
+			z-index: 2;
+		}
+	}
+	&-marker {
+		@include flexbox;
+		padding: 4px;
+		&:hover {
+			background-color: #efefef;
+			text-decoration: none;
+		}
+		&:focus {
+			text-decoration: none;
+		}
+		&-icon {
+			@include flex(0 0 auto);
+			height: 18px;
+			width: 18px;
+			margin-right: 5px;
+			background: transparent 50% 50% no-repeat;
+			background-size: contain;
+		}
+		&-text {
+			@include flex(1 1 auto);
+			line-height: 18px;
+		}
 	}
 }

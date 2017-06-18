@@ -23,7 +23,7 @@
 					<span v-if="r.geocode.loading">Loading...</span>
 					<span v-else-if="r.geocode.status==2">No result</span>
 					<span v-else-if="r.geocode.status==1">{{r.geocode.data}}</span>
-					<span v-else>lala</span>
+					<span v-else>Geocode data should be here.</span>
 				</span>
 			</p>
 			<p class="rp-iwin-actions" v-if="!editing">
@@ -80,16 +80,17 @@ export default {
 			this.editing = false;
 		},
 		save: function() {
-			this.$store.dispatch("project/updateDotDataPromise",{id:this.r.id,name:this.name,text:this.text}).then((msg) => {
+			this.$store.dispatch("project/setShapeData",{id:this.r.id,name:this.name,text:this.text}).then(result => {
+				this.$bus.$emit("success",result.msg);
+				this.$bus.$emit("toggleDotInfo");
 				this.cancel();
-				this.$bus.$emit("success",msg);
-			}).catch((msg) => this.$bus.$emit("error",msg));
+			}).catch(result => this.$bus.$emit("error",result.msg));
 		},
 		remove: function() {
-			this.$store.dispatch("project/removeShapePromise",this.r.id).then((msg) => {
+			this.$store.dispatch("project/removeShape",this.r).then(result => {
+				this.$bus.$emit("success",result.msg);
 				this.r = undefined;
-				this.$bus.$emit("success",msg);
-			}).catch((msg) => this.$bus.$emit("error",msg));
+			}).catch(result => this.$bus.$emit("error",result.msg));
 		}
 	},
 	mounted: function() {

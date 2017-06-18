@@ -61,7 +61,7 @@ export default {
 			mapTypeId: state => state.mapTypeId
 		}),
 		...mapState("project",{
-			projectInitialized: state => state.initialized
+			projectInitialized: state => !!state.id
 		}),
 		...mapState("tool",{
 			tool: state => state.name
@@ -69,6 +69,7 @@ export default {
 	},
 	watch: {
 		projectInitialized: function(b) {
+			console.log("projectInitialized",b);
 			if (!b) {
 				this.$store.dispatch("tool/setTool");
 			}
@@ -127,8 +128,7 @@ export default {
 					this.$bus.$emit("toggleDetailedResult",e.placeId,"poi");
 				}
 				else if (this.tool=="marker") {
-					this.$bus.$emit("tryAddDot",e,(resultType,shape) => {
-						console.log("tryAddDot",resultType,shape);
+					this.$bus.$emit("tryAdd","dot",e,(resultType,shape) => {
 						if (resultType=="success") {
 							this.$store.dispatch("tool/setTool");
 							this.$bus.$emit("showDotInfo",shape,true);
@@ -153,17 +153,21 @@ export default {
 				this.map.panTo(center);
 			}
 			this._updateDotGeocode = (shape,mode) => {
-				if ((shape.geocode.status==0||mode=="coordsUpdated") && !shape.geocode.loading && shape.position) {
-					this.$store.dispatch("project/setDotGeocode",{id:shape.id,loading:true});
+				console.log("_updateDotGeocode",shape,mode);
+				if (shape.geocode && (shape.geocode.status==0||mode=="coordsUpdated") && !shape.geocode.loading && shape.position) {
+					console.log("here1")
+					this.$store.dispatch("project/setShapeGeocodeData",{id:shape.id,loading:true});
 					const geocoder = new google.maps.Geocoder;
+					console.log("here2")
 					geocoder.geocode({location:shape.position},(results,status) => {
+						console.log("here3",results,status);
 						if (status=="OK" && results.length>0) {
-							this.$store.dispatch("project/setDotGeocode",{id:shape.id,status:1,data:results[0].formatted_address});
+							this.$store.dispatch("project/setShapeGeocodeData",{id:shape.id,status:1,data:results[0].formatted_address});
 						}
 						else {
-							this.$store.dispatch("project/setDotGeocode",{id:shape.id,status:2,data:""});
+							this.$store.dispatch("project/setShapeGeocodeData",{id:shape.id,status:2,data:""});
 						}
-						this.$store.dispatch("project/setDotGeocode",{id:shape.id,loading:false});
+						this.$store.dispatch("project/setShapeGeocodeData",{id:shape.id,loading:false});
 					});
 				}
 			}

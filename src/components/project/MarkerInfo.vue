@@ -74,7 +74,6 @@ export default {
 			this.note = this.r.note;
 			this.editing = true;
 			this.$nextTick(() => {
-				console.log(this.$refs);
 				this.$refs.note.focus();
 			});
 		},
@@ -83,16 +82,16 @@ export default {
 			this.editing = false;
 		},
 		save: function() {
-			this.$store.dispatch("project/updateMarkerNotePromise",{id:this.r.id,note:this.note}).then((msg) => {
+			this.$store.dispatch("project/setShapeData",{id:this.r.id,note:this.note}).then(result => {
+				this.$bus.$emit("success",result.msg);
 				this.cancel();
-				this.$bus.$emit("success",msg);
-			}).catch((msg) => this.$bus.$emit("error",msg));
+			}).catch(result => this.$bus.$emit("error",result.msg));
 		},
 		remove: function() {
-			this.$store.dispatch("project/removeShapePromise",this.r.id).then((msg) => {
+			this.$store.dispatch("project/removeShape",this.r).then(result => {
+				this.$bus.$emit("success",result.msg);
 				this.r = undefined;
-				this.$bus.$emit("success",msg);
-			}).catch((msg) => this.$bus.$emit("error",msg));
+			}).catch(result => this.$bus.$emit("error",result.msg));
 		}
 	},
 	mounted: function() {

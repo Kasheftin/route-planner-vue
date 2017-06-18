@@ -73,37 +73,3 @@ export default {
 }
 
 </script>
-
-<style lang="scss">
-
-
-.rp-toastrs {
-	position: fixed;
-	z-index: 3;
-	bottom: 10px;
-	left: 0;
-	right: 0;
-	width: 100%;
-	pointer-events: none;
-	@include flexbox();
-	@include flex-direction(column);
-	@include align-items(center);
-}
-
-.rp-toastr-container {
-	margin: 0 auto;
-	max-width: 80%;
-}
-
-.rp-toastr {
-	@include google-box-overlay;
-	margin: 10px 0;
-	pointer-events: auto;
-	.close {
-		margin-left: 5px;
-		font-size: 14px;
-		line-height: 14px;
-	}
-}
-
-</style>

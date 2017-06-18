@@ -1,6 +1,6 @@
 <template>
 	<div class="rp-layer" :class="{'-selected':selected,'-invisible':!layer.visible,'-highlighted':highlighted}" @click="selectLayer()">
-		<a href="javascript:void(0)" class="rp-layer-header" @click="expandLayer()" :class="{'-inactive':!layer.visible,'-active':selected}">
+		<a href="javascript:void(0)" class="rp-layer-header" @click="switchLayerExpanded" :class="{'-inactive':!layer.visible,'-active':selected}">
 			<div class="rp-layer-header-expand-icon">
 				<span class="icon" :class="{'icon-calcplus':!layer.expanded,'icon-calcminus':layer.expanded}"></span>
 			</div>
@@ -10,7 +10,7 @@
 					<span class="icon icon-cog"></span>
 				</div>
 			</transition>
-			<div class="rp-layer-header-visible-icon" @click.stop="switchLayerVisibility">
+			<div class="rp-layer-header-visible-icon" @click.stop="switchLayerVisible">
 				<span class="icon" :class="{'icon-check':layer.visible,'icon-uncheck':!layer.visible}"></span>
 			</div>
 		</a>
@@ -18,8 +18,8 @@
 			<div class="rp-layer-body-container" v-if="layer.expanded">
 				<div class="rp-layer-body">
 					<div class="rp-layer-body-empty" v-show="showEmpty" ref="empty">-- Empty --</div>
-					<Draggable class="rp-layer-body-list" :options="{group:'shapes',handle:'.rp-layer-draggable'}" :value="layer.shapes" :move="checkMove" @start="startMove($event)" @end="moveShape($event)" :data-layer-id="layer.id">
-						<template v-for="s in layer.shapes">
+					<Draggable class="rp-layer-body-list" :options="{group:'shapes',handle:'.rp-layer-draggable'}" :value="shapes" :move="checkMove" @start="startMove($event)" @end="moveShape($event)" :data-layer-id="layer.id">
+						<template v-for="s in shapes">
 							<template v-if="s.type=='marker'">
 								<a href="javascript:void(0)" class="rp-layer-marker rp-layer-draggable" :key="s.id" @click="flyToAndShowMarkerInfo(s)">
 									<i class="rp-layer-marker-icon" :style="{backgroundImage:'url('+s.icon+')'}"></i>
@@ -55,19 +55,23 @@ export default {
 	computed: {
 		showEmpty: function() {
 			if (this.dragging) return false;
-			return this.layer.shapes.length==0;
+			return this.$store.getters["project/layerShapes"](this.layer.id).length==0;
+		},
+		shapes: function() {
+			return this.$store.getters["project/layerShapes"](this.layer.id);
 		}
 	},
 	methods: {
 		selectLayer: function() {
-			this.$emit("selectLayer");
+			this.$bus.$emit("selectLayer",this.layer.id);
 		},
-		expandLayer: function() {
-			this.$store.dispatch("project/switchLayerExpand",this.layer);
+		switchLayerExpanded: function() {
+			this.$store.dispatch("project/switchLayerExpanded",{id:this.layer.id}).catch(result => this.$bus.$emit("error",result.error));
 		},
-		switchLayerVisibility: function() {
-			this.$store.dispatch('project/switchLayerVisibility',this.layer);
-			this.$emit("selectLayer");
+		switchLayerVisible: function() {
+			this.$store.dispatch("project/switchLayerVisible",{id:this.layer.id}).then(result => {
+				this.$bus.$emit("selectLayer",this.layer.id);
+			}).catch(result => this.$bus.$emit("error",result.msg));
 		},
 		editLayer: function() {
 			this.$bus.$emit("switchModal",LayerInfoEditor,{layer:this.layer});
@@ -139,80 +143,3 @@ export default {
 }
 
 </script>
-
-<style lang="scss" scoped>
-.rp-layer {
-	border-top: 1px solid #e5e5e5;
-	border-left: 4px solid transparent;
-	padding: 10px;
-	padding-left: 6px;
-	background-color: #ffffff;
-	font-size: 13px;
-	transition: all 0.3s ease;
-	&.-selected {
-		border-left-color: #4d90fe;
-	}
-	&.-highlighted {
-		background-color: $state-info-bg;
-	}
-	&-header {
-		@include flexbox;
-		@include linkcontrol;
-		&-title {
-			@include flex-grow(1);
-		}
-		&-expand-icon {
-			overflow: hidden;
-			.icon {
-				margin-right: 5px;
-			}
-		}
-	}
-	&-body-container {
-		overflow: hidden;
-	}
-	&-body {
-		border-top: 1px dotted #e5e5e5;
-		padding: 8px 0;
-		margin-top: 5px;
-		margin-left: 15px;
-		position: relative;
-		&-empty {
-			padding: 5px;
-			position: absolute;
-			top: 8px;
-			left: 0;
-			right: 0;
-			z-index: 1;
-		}
-		&-list {
-			min-height: 30px;
-			position: relative;
-			z-index: 2;
-		}
-	}
-	&-marker {
-		@include flexbox;
-		padding: 4px;
-		&:hover {
-			background-color: #efefef;
-			text-decoration: none;
-		}
-		&:focus {
-			text-decoration: none;
-		}
-		&-icon {
-			@include flex(0 0 auto);
-			height: 18px;
-			width: 18px;
-			margin-right: 5px;
-			background: transparent 50% 50% no-repeat;
-			background-size: contain;
-		}
-		&-text {
-			@include flex(1 1 auto);
-			line-height: 18px;
-		}
-	}
-}
-</style>

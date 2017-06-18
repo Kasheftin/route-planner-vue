@@ -37,6 +37,9 @@ const prepareShapeData = function(type,data) {
 	else if (type=="dot") {
 		return prepareDotData(data);
 	}
+	else if (type=="route") {
+		return prepareRouteData(data);
+	}
 }
 
 const prepareMarkerData = function(data) {
@@ -81,6 +84,22 @@ const prepareDotData = function(data) {
 		out.position = {lat:data.latLng.lat(),lng:data.latLng.lng()};
 	}
 	return _.pick(out,"id","type","name","text","position","icon","geocode");
+}
+
+const prepareRouteData = function(data) {
+	const out = _.extend(true,{
+		id: (new ObjectID).toString(),
+		type: "route",
+		name: "",
+		distance: 0,
+		duration: 0,
+		mode: "auto",
+		nohighways: false,
+		notolls: false,
+		waypoints: [],
+		editing: false
+	},config.route,data);
+	return _.pick(out,"id","type","name","distance","duration","mode","nohighways","notolls","waypoints");
 }
 
 const findShape = function(id,type,action) {

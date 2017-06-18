@@ -6,7 +6,7 @@
 		<button class="btn btn-default" :class="{'-active':tool=='marker'}" @click="$store.dispatch('tool/setTool','marker')">
 			<span class="icon-mapmarker"></span>
 		</button>
-		<button class="btn btn-default" :class="{'-active':tool=='path'}" @click="$store.dispatch('tool/setTool','path')">
+		<button class="btn btn-default" @click="tryAddRoute">
 			<span class="icon-directions"></span>
 		</button>
 		<button class="btn btn-default" :class="{'-active':tool=='path'}" @click="$store.dispatch('tool/setTool','path')">
@@ -20,6 +20,13 @@ export default {
 	computed: {
 		tool: function() {
 			return this.$store.state.tool.name;
+		}
+	},
+	methods: {
+		tryAddRoute: function() {
+			this.$bus.$emit("tryAdd","route",{editing:true},(resultType,shape) => {
+				this.$store.dispatch("project/switchLayerExpanded",{id:shape.layerId,expanded:true}).catch(result => this.$bus.$emit("error",result.msg));
+			});
 		}
 	}
 }
