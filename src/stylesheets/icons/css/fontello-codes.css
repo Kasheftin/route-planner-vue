@@ -14,3 +14,8 @@
 .icon-checkmark:before { content: '\e80c'; } /* '' */
 .icon-plus:before { content: '\e80d'; } /* '' */
 .icon-pin:before { content: '\e80e'; } /* '' */
+.icon-loading:before { content: '\e80f'; } /* '' */
+.icon-walking:before { content: '\f183'; } /* '' */
+.icon-driving:before { content: '\f1b9'; } /* '' */
+.icon-bicycling:before { content: '\f206'; } /* '' */
+.icon-transit:before { content: '\f238'; } /* '' */

@@ -4,7 +4,7 @@
 			<div class="rp-rcontrols">
 				<a class="icon-save" href="javascript:void(0)" @click="saveProject"></a>
 				<a class="icon-cog" href="javascript:void(0)" @click="editProject"></a>
-				<a class="icon-times" href="javascript:void(0)" @click="$store.dispatch('project/closProject')"></a>
+				<a class="icon-times" href="javascript:void(0)" @click="$store.dispatch('project/closeProject')"></a>
 			</div>
 			<h4>{{name}}</h4>
 			<p v-if="description" v-html="compiledDescription"></p>

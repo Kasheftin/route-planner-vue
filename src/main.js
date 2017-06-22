@@ -28,6 +28,23 @@ Vue.filter("commedArray",function(ar) {
 	return (ar||[]).join(", ");
 });
 
+Vue.filter("duration",function(v) {
+	const h = Math.floor(v/3600);
+	const m = Math.floor((v-h*3600)/60);
+	const s = v-h*3600-m*60;
+	if (h==0 && m==0) return s+" sec";
+	if (h==0) return m+" min";
+	return h+" h "+m+" min";
+});
+
+Vue.filter("distance",function(v) {
+	const km = Math.floor(v/1000);
+	const m = v-km*1000;
+	if (km==0) return v+" m";
+	if (km<10) return km+" km "+m+" m";
+	return km+" km.";
+});
+
 Object.defineProperty(Vue.prototype,"$bus",{
 	get: function() {
 		return this.$root.bus;

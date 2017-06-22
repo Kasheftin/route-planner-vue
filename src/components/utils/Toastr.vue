@@ -46,10 +46,14 @@ export default {
 		}
 	},
 	created: function() {
-		const cn = (message,type) => {
+		const cn = (messageOrResult,type) => {
+			let message = messageOrResult;
+			if (_.isObject(messageOrResult)) {
+				message = messageOrResult.msg;
+			}
 			this.notifications.push({type:type,css:(type=="error"?"danger":type),message:message,created:(new Date).getTime(),show:true,pinned:false,key:Math.random()});
-			if (type=="error") console.error(message);
-			else if (type=="success") console.log(message);
+			if (type=="error") console.error(messageOrResult);
+			else console.log(messageOrResult);
 		}
 		this._se = (message) => cn(message,"error");
 		this._ss = (message) => cn(message,"success");
@@ -60,7 +64,7 @@ export default {
 		const run = () => {
 			const t = (new Date).getTime();
 			this.notifications = _.filter(this.notifications,(n) => n.pinned || n.created+this.duration>t);
-			this._tm = setTimeout(run,200);
+			this._tm = setTimeout(run,500);
 		}
 		run();
 	},

@@ -11,7 +11,7 @@ f<template>
 		>
 			<SearchResults />
 			<SearchDetailedResult />
-			<ProjectMarkers v-if="projectInitialized" />
+			<ProjectMarkers />
 			<ProjectMarkerInfo />
 			<ProjectDotInfo />
 		</gmap-map>
@@ -35,7 +35,7 @@ f<template>
 </template>
 
 <script>
-import {mapState,mapActions,mapMutations} from "vuex";
+import {mapState,mapActions,mapMutations,mapGetters} from "vuex";
 import Manager from "./Manager.vue";
 import Project from "./project/Main.vue";
 import ProjectMarkers from "./project/Markers.vue";
@@ -46,6 +46,8 @@ import SearchResults from "./search/Results.vue";
 import SearchDetailedResult from "./search/DetailedResult.vue";
 import ToolBox from "./tools/Box.vue";
 import Toastr from "./utils/Toastr.vue";
+
+const routes = {};
 
 export default {
 	data: function() {
@@ -63,6 +65,7 @@ export default {
 		...mapState("project",{
 			projectInitialized: state => !!state.id
 		}),
+		...mapGetters("project",["visibleRoutesIs"]),
 		...mapState("tool",{
 			tool: state => state.name
 		})
@@ -76,6 +79,59 @@ export default {
 		},
 		tool: function(tool) {
 			this.map && this.map.setOptions({draggableCursor:tool=="marker"?"crosshair":null});
+		},
+		visibleRoutesIs: function(ids) {
+			this.updateVisibleRoutes(ids);
+		}
+	},
+	methods: {
+		updateVisibleRoutes: function(ids) {
+			_.each(routes,(r,id) => {
+				r.setMap(ids[id]?this.map:undefined);
+			});
+		},
+		drawRoute: function(id,route) {
+			console.log("drawRoute",id,route,this.visibleRoutesIs);
+			if (routes[id]) {
+				routes[id].setMap(undefined);
+				delete routes[id];
+			}
+			routes[id] = new google.maps.DirectionsRenderer({draggable:true,map:this.visibleRoutesIs[id]?this.map:undefined});
+			routes[id].setDirections(route);
+			routes[id].addListener("directions_changed",() => {
+				const directions = routes[id].getDirections();
+				this.updateRouteStat(route,directions);
+				if (directions && directions.geocoded_waypoints) {
+					const p = [];
+					directions.geocoded_waypoints.forEach(wp => {
+						p.push(new Promise((resolve,reject) => {
+							this.$bus.$emit("getDetailedResult",wp.place_id,(resultType,result) => {
+								resolve(resultType=="success"?result:null);
+							});
+						}));
+					});
+					Promise.all(p).then(values => {
+						this.$store.dispatch("project/setShapeData",{id:id,waypoints:_.map(values,v => v?v.formatted_address:"")});
+					});
+				}
+			});
+		},
+		clearRoute: function(id) {
+			if (routes[id]) {
+				routes[id].setMap(undefined);
+			}
+			delete routes[id];
+		},
+		updateRouteStat: function(route,stat) {
+			let totalDistance = 0;
+			let totalDuration = 0;
+			if (stat.routes.length>0) {
+				stat.routes[0].legs.forEach(leg => {
+					totalDistance += leg.distance.value;
+					totalDuration += leg.duration.value;
+				});
+			}
+			this.$store.dispatch("project/setShapeData",{id:route.id,distance:totalDistance,duration:totalDuration});
 		}
 	},
 	created: function() {
@@ -153,14 +209,10 @@ export default {
 				this.map.panTo(center);
 			}
 			this._updateDotGeocode = (shape,mode) => {
-				console.log("_updateDotGeocode",shape,mode);
 				if (shape.geocode && (shape.geocode.status==0||mode=="coordsUpdated") && !shape.geocode.loading && shape.position) {
-					console.log("here1")
 					this.$store.dispatch("project/setShapeGeocodeData",{id:shape.id,loading:true});
 					const geocoder = new google.maps.Geocoder;
-					console.log("here2")
 					geocoder.geocode({location:shape.position},(results,status) => {
-						console.log("here3",results,status);
 						if (status=="OK" && results.length>0) {
 							this.$store.dispatch("project/setShapeGeocodeData",{id:shape.id,status:1,data:results[0].formatted_address});
 						}
@@ -171,14 +223,41 @@ export default {
 					});
 				}
 			}
+			this._buildRoute = (shape,callback) => {
+				const filledWaypoints = _.filter(shape.waypoints,w => !!w);
+				if (!filledWaypoints || filledWaypoints.length<2) return callback && callback("error",{msg:"Can not build the route - waypoints are not filled correctly."});
+				const ds = new google.maps.DirectionsService();
+				ds.route({
+					origin: filledWaypoints[0],
+					destination: filledWaypoints[filledWaypoints.length-1],
+					waypoints: _.map(filledWaypoints.slice(1,-1),v=>{return {location:v};}),
+					travelMode: google.maps.TravelMode[shape.mode.toUpperCase()],
+					provideRouteAlternatives: false,
+					avoidHighways: shape.nohighways,
+					avoidTolls: shape.notolls
+				},(response,status) => {
+					if (status == google.maps.DirectionsStatus.OK) {
+						this.updateRouteStat(shape,response);
+						this.drawRoute(shape.id,response);
+						return callback && callback("success");
+					}
+					else return callback && callback("error",{msg:"Failed to build the route."});
+				});
+			}
+			this._destroyRoute = (shape,callback) => {
+				delete routes[shape.id];
+				this.clearRoute(shape.id);
+			}
 			this.$bus.$on("setMapBounds",this._setMapBounds);
 			this.$bus.$on("setMapCenter",this._setMapCenter);
 			this.$bus.$on("updateDotGeocode",this._updateDotGeocode);
+			this.$bus.$on("buildRoute",this._buildRoute);
+			this.$bus.$on("destroyRoute",this._destroyRoute);
 			this.$promises.resolve("mapReady",this.map);
 		});
 	},
 	beforeDestroy: function() {
-		["switchModal","closeModal","setMapBounds","setMapCenter"].forEach((f) => {
+		["switchModal","closeModal","setMapBounds","setMapCenter","buildRoute","destroyRoute"].forEach((f) => {
 			this.hasOwnProperty("_"+f) && this.$bus.$off(f,this["_"+f]);
 		});
 	},

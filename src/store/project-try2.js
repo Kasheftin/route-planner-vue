@@ -19,6 +19,19 @@ const getters = {
 		const layer = state.layers[layerId];
 		if (!layer || !layer.shapesIds || layer.shapesIds.length==0) return [];
 		return layer.shapesIds.map(shapeId => state.shapes[shapeId]);
+	},
+	visibleRoutesIs: (state,getters) => {
+		const ids = {};
+		_.each(state.layers,l => {
+			if (l.visible) {
+				l.shapesIds.forEach(s => {
+					if (state.shapes[s] && state.shapes[s].type=="route") {
+						ids[s] = true;
+					}
+				});
+			}
+		});
+		return ids;
 	}
 }
 
@@ -169,6 +182,15 @@ const actions = {
 			resolve({msg:"Shape data updated."});
 		});
 	},
+	moveShapeWaypoint: function({commit},data) {
+		return new Promise((resolve,reject) => {
+			const s = state.shapes[data.id];
+			if (!s) return reject({msg:"Shape #"+data.id+" does not exist."});
+			data.shape = s;
+			commit("moveShapeWaypoint",data);
+			resolve({msg:"Shape waypoints resorted."});
+		});
+	},
 	setShapeGeocodeData: function({commit},data) {
 		return new Promise((resolve,reject) => {
 			const s = state.shapes[data.id];
@@ -240,16 +262,21 @@ const mutations = {
 	removeShapeFromLayer: function(state,data) {
 		const index = data.layer.shapesIds.indexOf(data.shape.id);
 		if (index===0||index>0) {
-			state.layer.shapesIds.splice(index,1);
+			data.layer.shapesIds.splice(index,1);
 		}
 		Vue.delete(state.shapes,data.shape.id);
 	},
 	setShapeData: function(state,data) {
+		console.log("setShapeData",data);
 		_.each(data.shape,(v,k) => {
 			if (k!="id" && data.hasOwnProperty(k)) {
 				Vue.set(data.shape,k,data[k]);
 			}
 		});
+	},
+	moveShapeWaypoint: function(state,e) {
+		if (e.oldIndex==e.newIndex) return;
+		e.shape.waypoints.splice(e.newIndex,0,e.shape.waypoints.splice(e.oldIndex,1)[0]);
 	},
 	setShapeGeocodeData: function(state,data) {
 		_.each(data.shape.geocode,(v,k) => {
@@ -331,13 +358,14 @@ const prepareRouteData = function(data) {
 		name: "",
 		distance: 0,
 		duration: 0,
-		mode: "auto",
+		mode: "driving",
 		nohighways: false,
 		notolls: false,
-		waypoints: [],
-		editing: false
+		waypoints: ["",""],
+		editing: false,
+		loading: false
 	},config.route,data);
-	return _.pick(out,"id","type","name","distance","duration","mode","nohighways","notolls","waypoints","editing");
+	return _.pick(out,"id","type","name","distance","duration","mode","nohighways","notolls","waypoints","editing","loading");
 }
 
 export default {

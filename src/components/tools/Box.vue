@@ -25,7 +25,9 @@ export default {
 	methods: {
 		tryAddRoute: function() {
 			this.$bus.$emit("tryAdd","route",{editing:true},(resultType,shape) => {
-				this.$store.dispatch("project/switchLayerExpanded",{id:shape.layerId,expanded:true}).catch(result => this.$bus.$emit("error",result.msg));
+				this.$store.dispatch("project/switchLayerExpanded",{id:shape.layerId,expanded:true}).then(result => {
+					this.$bus.$emit("shapeFocus",shape);
+				}).catch(result => this.$bus.$emit("error",result.msg));
 			});
 		}
 	}

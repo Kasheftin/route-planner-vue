@@ -6,6 +6,9 @@ html,body,.rp-container,.vue-map-container {
 	position: relative;
 	top: 2px;
 }
+.fa-icon:before {
+	top: 0;
+}
 
 .vue-map-container {
 	position: fixed;
@@ -316,8 +319,9 @@ html,body,.rp-container,.vue-map-container {
 	&-marker {
 		@include flexbox;
 		padding: 4px;
+		margin-bottom: 1px;
 		&:hover {
-			background-color: #efefef;
+			background-color: rgba(0,0,0,0.05);
 			text-decoration: none;
 		}
 		&:focus {
@@ -336,4 +340,61 @@ html,body,.rp-container,.vue-map-container {
 			line-height: 18px;
 		}
 	}
+	&-route {
+		padding: 4px;
+		margin-bottom: 1px;
+		background-color: rgba(0,0,0,0.05);
+		&-header {
+			margin-bottom: 2px;
+			.icon {
+				width: 18px;
+				height: 18px;
+				margin-right: 5px;
+				display: block;
+				float: left;
+			}
+			&-control {
+				color: #111111;
+				font-size: 10px;
+				display: block;
+				position: absolute;
+				top: 4px;
+				right: 4px;
+			}
+		}
+		&-settings {
+			margin-bottom: 4px;
+		}
+		&-checkboxes {
+			margin-top: 2px;
+			.checkbox {
+				margin-top: 0;
+				padding-left: 0;
+			}
+		}
+		&-routes {
+			&-item {
+				margin-bottom: 4px;
+				.icon {
+					font-size: 10px;
+				}
+			}
+			&-stat {
+				text-align: right;
+			}
+		}
+	}
+}
+
+@keyframes icon-spin {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(359deg);
+	}
+}
+.icon-spin {
+	animation: icon-spin 2s infinite linear;
+	display: inline-block;
 }
