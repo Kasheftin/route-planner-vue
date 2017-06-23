@@ -176,7 +176,8 @@ const actions = {
 	setShapeData: function({commit},data) {
 		return new Promise((resolve,reject) => {
 			const s = state.shapes[data.id];
-			if (!s) return reject({msg:"Shape #"+data.id+" does not exist."});
+			console.log("setShaepData",data,s);
+			if (!s) return reject({msg:"Shape #"+data.id+" does not exist.1"});
 			data.shape = s;
 			commit("setShapeData",data);
 			resolve({msg:"Shape data updated."});
@@ -305,6 +306,9 @@ const prepareShapeData = function(type,data) {
 	else if (type=="route") {
 		return prepareRouteData(data);
 	}
+	else if (type=="polygon") {
+		return preparePolygonData(data);
+	}
 }
 
 const prepareMarkerData = function(data) {
@@ -366,6 +370,19 @@ const prepareRouteData = function(data) {
 		loading: false
 	},config.route,data);
 	return _.pick(out,"id","type","name","distance","duration","mode","nohighways","notolls","waypoints","editing","loading");
+}
+
+const preparePolygonData = function(data) {
+	const out = _.extend(true,{
+		id: (new ObjectID).toString(),
+		type: "polygon",
+		name: "",
+		text: "",
+		color: "",
+		path: [],
+		area: 0
+	},config.polygon,data);
+	return _.pick(out,"id","type","name","text","color","path","area");
 }
 
 export default {

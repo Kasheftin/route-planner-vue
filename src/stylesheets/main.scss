@@ -316,7 +316,7 @@ html,body,.rp-container,.vue-map-container {
 			z-index: 2;
 		}
 	}
-	&-marker {
+	&-marker,&-polygon {
 		@include flexbox;
 		padding: 4px;
 		margin-bottom: 1px;
@@ -344,6 +344,7 @@ html,body,.rp-container,.vue-map-container {
 		padding: 4px;
 		margin-bottom: 1px;
 		background-color: rgba(0,0,0,0.05);
+		position: relative;
 		&-header {
 			margin-bottom: 2px;
 			.icon {

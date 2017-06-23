@@ -32,6 +32,12 @@
 									<span class="rp-layer-marker-text">{{s.name}}</span>
 								</a>
 							</template>
+							<template v-if="s.type=='polygon'">
+								<a href="javascript:void(0)" class="rp-layer-polygon rp-layer-draggable" :key="s.id" @click="flyToAndShowPolygonInfo(s)">
+									<span class="icon icon-transform"></span>
+									<span class="rp-layer-polygon-text">{{s.name}}</span>
+								</a>
+							</template>
 							<template v-if="s.type=='route'">
 								<div class="rp-layer-route rp-layer-draggable" :key="s.id" :ref="'shape'+s.id">
 									<div class="clearfix">
@@ -192,6 +198,10 @@ export default {
 		flyToAndShowDotInfo: function(data) {
 			this.$bus.$emit("setMapCenter",data.position);
 			this.$bus.$emit("showDotInfo",data);
+		},
+		flyToAndShowPolygonInfo: function(data) {
+			this.$bus.$emit("setMapBounds",data.path);
+			this.$bus.$emit("showPolygonInfo",data);
 		},
 		routeName: function(s) {
 			const filledWaypoints = _.filter(s.waypoints,w => !!w);

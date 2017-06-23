@@ -12,7 +12,7 @@ import store from "./store";
 Vue.use(VueGoogleMaps,{
 	load: {
 		key: "AIzaSyBg4OgaTYn02ZESKX2DuQ70wzORVCrsVRM",
-		libraries: "places"
+		libraries: "places,geometry"
 	}
 });
 
@@ -41,8 +41,17 @@ Vue.filter("distance",function(v) {
 	const km = Math.floor(v/1000);
 	const m = v-km*1000;
 	if (km==0) return v+" m";
-	if (km<10) return km+" km "+m+" m";
+	if (km<3) return km+" km "+m+" m";
 	return km+" km.";
+});
+
+Vue.filter("sq",function(v) {
+	v = Math.floor(v);
+	if (v<1000*100) return v+" sqm";
+	v = v/1000/1000;
+	if (v<1) return v.toFixed(2)+" sqkm";
+	if (v<10) return v.toFixed(1)+" sqkm";
+	return Math.round(v)+" sqkm";
 });
 
 Object.defineProperty(Vue.prototype,"$bus",{

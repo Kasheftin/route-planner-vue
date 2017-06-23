@@ -26,5 +26,9 @@ export default {
 	},
 	route: {
 		waypoints: ["",""]
+	},
+	polygon: {
+		name: "Untitled polygon",
+		color: "#FF0000"
 	}
 };

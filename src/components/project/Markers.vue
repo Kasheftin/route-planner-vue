@@ -19,6 +19,17 @@
 				@click="$bus.$emit('toggleDotInfo',s)"
 				@dragend="updateDotPosition(s,$event)"
 			/>
+			<gmap-polygon
+				v-if="s.type=='polygon'"
+				:key="s.id"
+				:draggable="true"
+				:editable="true"
+				:options="{strokeColor:s.color,fillColor:s.color,strokeOpacity:0.8,strokeWeight:2,fillOpacity:0.35}"
+				:path="s.path"
+				@path_changed="updatePolygonPath(s,$event)"
+				@rightclick="removePolygonPoint(s,$event)"
+				@click="showPolygonInfo(s,$event)"
+			/>
 		</template>
 	</div>
 </template>
@@ -51,6 +62,32 @@ export default {
 				this.$bus.$emit("success",result.msg);
 				this.$bus.$emit("updateDotGeocode",shape,"coordsUpdated");
 			}).catch(result => this.$bus.$emit("error",result.msg));
+		},
+		updatePolygonPath: function(shape,data) {
+			const path = _.map(data.getArray(),p=>{return {lat:p.lat(),lng:p.lng()}});
+			this.$store.dispatch("project/setShapeData",{id:shape.id,path:path}).then(result => {
+				this.$bus.$emit("updatePolygonArea",shape);
+			}).catch(result => this.$bus.$emit("error",result.msg));
+		},
+		removePolygonPoint: function(shape,data) {
+			if (data.vertex===0||data.vertex>0) {
+				const path = [
+					...shape.path.slice(0,data.vertex),
+					...shape.path.slice(data.vertex+1)
+				];
+				if (path.length>2) {
+					this.$store.dispatch("project/setShapeData",{id:shape.id,path:path}).then(result => {
+						this.$bus.$emit("updatePolygonArea",shape);
+					}).catch(result => this.$bus.$emit("error",result.msg));
+				}
+				else {
+					this.$store.dispatch("project/removeShape",shape).then(result => {
+					}).catch(result => this.$bus.$emit("error",result.msg));
+				}
+			}
+		},
+		showPolygonInfo: function(shape,e) {
+			this.$bus.$emit("showPolygonInfo",shape,undefined,{lat:e.latLng.lat(),lng:e.latLng.lng()});
 		}
 	}
 }

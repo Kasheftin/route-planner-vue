@@ -1,4 +1,4 @@
-f<template>
+<template>
 	<div class="rp-container">
 		<gmap-map
 			:center="center"
@@ -14,6 +14,7 @@ f<template>
 			<ProjectMarkers />
 			<ProjectMarkerInfo />
 			<ProjectDotInfo />
+			<ProjectPolygonInfo />
 		</gmap-map>
 		<transition name="rp-modal">
 			<div v-if="projectInitialized">
@@ -41,6 +42,7 @@ import Project from "./project/Main.vue";
 import ProjectMarkers from "./project/Markers.vue";
 import ProjectMarkerInfo from "./project/MarkerInfo.vue";
 import ProjectDotInfo from "./project/DotInfo.vue";
+import ProjectPolygonInfo from "./project/PolygonInfo.vue";
 import SearchBox from "./search/Box.vue";
 import SearchResults from "./search/Results.vue";
 import SearchDetailedResult from "./search/DetailedResult.vue";
@@ -100,7 +102,7 @@ export default {
 			routes[id].setDirections(route);
 			routes[id].addListener("directions_changed",() => {
 				const directions = routes[id].getDirections();
-				this.updateRouteStat(route,directions);
+				this.updateRouteStat(id,directions);
 				if (directions && directions.geocoded_waypoints) {
 					const p = [];
 					directions.geocoded_waypoints.forEach(wp => {
@@ -122,7 +124,7 @@ export default {
 			}
 			delete routes[id];
 		},
-		updateRouteStat: function(route,stat) {
+		updateRouteStat: function(id,stat) {
 			let totalDistance = 0;
 			let totalDuration = 0;
 			if (stat.routes.length>0) {
@@ -131,7 +133,22 @@ export default {
 					totalDuration += leg.duration.value;
 				});
 			}
-			this.$store.dispatch("project/setShapeData",{id:route.id,distance:totalDistance,duration:totalDuration});
+			console.log("updateRouteStat",totalDuration,totalDistance);
+			this.$store.dispatch("project/setShapeData",{id:id,distance:totalDistance,duration:totalDuration});
+		},
+		latLng2Point: function(latLng,map) {
+			const topRight = map.getProjection().fromLatLngToPoint(map.getBounds().getNorthEast());
+			const bottomLeft = map.getProjection().fromLatLngToPoint(map.getBounds().getSouthWest());
+			const scale = Math.pow(2,map.getZoom());
+			const worldPoint = map.getProjection().fromLatLngToPoint(latLng);
+			return new google.maps.Point((worldPoint.x-bottomLeft.x)*scale,(worldPoint.y-topRight.y)*scale);
+		},
+		point2LatLng: function(point,map) {
+			const topRight = map.getProjection().fromLatLngToPoint(map.getBounds().getNorthEast());
+			const bottomLeft = map.getProjection().fromLatLngToPoint(map.getBounds().getSouthWest());
+			const scale = Math.pow(2,map.getZoom());
+			const worldPoint = new google.maps.Point(point.x/scale+bottomLeft.x,point.y/scale+topRight.y);
+			return map.getProjection().fromPointToLatLng(worldPoint);
 		}
 	},
 	created: function() {
@@ -202,6 +219,9 @@ export default {
 					else if (r.geometry && r.geometry.location) {
 						bounds.extend(r.geometry.location);
 					}
+					else if (r.lat && r.lng) {
+						bounds.extend(r);
+					}
 				});
 				this.map.fitBounds(bounds);
 			}
@@ -223,6 +243,13 @@ export default {
 					});
 				}
 			}
+			this._updatePolygonArea = (shape) => {
+				let area = 0;
+				if (shape && shape.path && shape.path.length>0) {
+					area = google.maps.geometry.spherical.computeArea(_.map(shape.path,p => new google.maps.LatLng(p.lat,p.lng)));
+				}
+				this.$store.dispatch("project/setShapeData",{id:shape.id,area:area});
+			}
 			this._buildRoute = (shape,callback) => {
 				const filledWaypoints = _.filter(shape.waypoints,w => !!w);
 				if (!filledWaypoints || filledWaypoints.length<2) return callback && callback("error",{msg:"Can not build the route - waypoints are not filled correctly."});
@@ -237,7 +264,7 @@ export default {
 					avoidTolls: shape.notolls
 				},(response,status) => {
 					if (status == google.maps.DirectionsStatus.OK) {
-						this.updateRouteStat(shape,response);
+						this.updateRouteStat(shape.id,response);
 						this.drawRoute(shape.id,response);
 						return callback && callback("success");
 					}
@@ -248,16 +275,27 @@ export default {
 				delete routes[shape.id];
 				this.clearRoute(shape.id);
 			}
+			this._tryAddPolygon = (callback) => {
+				const cp = this.latLng2Point(this.map.getCenter(),this.map);
+				const p1 = this.point2LatLng({x:cp.x-100,y:cp.y-80},this.map);
+				const p2 = this.point2LatLng({x:cp.x+100,y:cp.y-80},this.map);
+				const p3 = this.point2LatLng({x:cp.x+100,y:cp.y+80},this.map);
+				const p4 = this.point2LatLng({x:cp.x-100,y:cp.y+80},this.map);
+				const path = _.map([p1,p2,p3,p4],p=>{return{lat:p.lat(),lng:p.lng()}});
+				this.$bus.$emit("tryAdd","polygon",{path:path},callback);
+			}
 			this.$bus.$on("setMapBounds",this._setMapBounds);
 			this.$bus.$on("setMapCenter",this._setMapCenter);
 			this.$bus.$on("updateDotGeocode",this._updateDotGeocode);
+			this.$bus.$on("updatePolygonArea",this._updatePolygonArea);
 			this.$bus.$on("buildRoute",this._buildRoute);
 			this.$bus.$on("destroyRoute",this._destroyRoute);
+			this.$bus.$on("tryAddPolygon",this._tryAddPolygon);
 			this.$promises.resolve("mapReady",this.map);
 		});
 	},
 	beforeDestroy: function() {
-		["switchModal","closeModal","setMapBounds","setMapCenter","buildRoute","destroyRoute"].forEach((f) => {
+		["switchModal","closeModal","setMapBounds","setMapCenter","buildRoute","destroyRoute","tryAddPolygon","updateDotGeocode","updatePolygonArea"].forEach((f) => {
 			this.hasOwnProperty("_"+f) && this.$bus.$off(f,this["_"+f]);
 		});
 	},
@@ -270,6 +308,7 @@ export default {
 		ProjectMarkers,
 		ProjectMarkerInfo,
 		ProjectDotInfo,
+		ProjectPolygonInfo,
 		SearchBox,
 		SearchResults,
 		SearchDetailedResult,

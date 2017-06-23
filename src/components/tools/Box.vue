@@ -9,7 +9,7 @@
 		<button class="btn btn-default" @click="tryAddRoute">
 			<span class="icon-directions"></span>
 		</button>
-		<button class="btn btn-default" :class="{'-active':tool=='path'}" @click="$store.dispatch('tool/setTool','path')">
+		<button class="btn btn-default" @click="tryAddPolygon">
 			<span class="icon-transform"></span>
 		</button>
 	</div>
@@ -27,7 +27,15 @@ export default {
 			this.$bus.$emit("tryAdd","route",{editing:true},(resultType,shape) => {
 				this.$store.dispatch("project/switchLayerExpanded",{id:shape.layerId,expanded:true}).then(result => {
 					this.$bus.$emit("shapeFocus",shape);
-				}).catch(result => this.$bus.$emit("error",result.msg));
+				}).catch(result => this.$bus.$emit("error",result));
+			});
+		},
+		tryAddPolygon: function() {
+			this.$bus.$emit("tryAddPolygon",(resultType,shape) => {
+				this.$store.dispatch("project/switchLayerExpanded",{id:shape.layerId,expanded:true}).then(result => {
+					this.$bus.$emit("updatePolygonArea",shape);
+					this.$bus.$emit("showPolygonInfo",shape,true);
+				}).catch(result => this.$bus.$emit("error",result));
 			});
 		}
 	}
