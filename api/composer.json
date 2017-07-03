@@ -1,0 +1,7 @@
+{
+	"name": "kasheftin/route-planner-vue",
+	"version": "1.0.0",
+	"require": {
+		"kasheftin/safemysql-static": "1.0.0"
+	}
+}
