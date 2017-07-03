@@ -24,6 +24,7 @@ import {mapState,mapGetters} from "vuex";
 import Marked from "marked";
 import Layer from "./Layer.vue";
 import InfoEditor from "./InfoEditor.vue";
+import SaveEditor from "./SaveEditor.vue";
 
 export default {
 	data: function() {
@@ -54,12 +55,7 @@ export default {
 			}).catch(result => this.$bus.$emit("error",result.msg));
 		},
 		saveProject: function() {
-			var r = [
-				"Project saved.",
-				"Some error appeared with processing of the result.",
-				"Some long text goes here. Includes over 250 glyphs in font format from the Glyphicon Halflings set. Glyphicons Halflings are normally not available for free, but their creator has made them available for Bootstrap free of cost. As a thank you, we only ask that you include a link back to Glyphicons whenever possible."
-			]
-			this.$bus.$emit("success",r[Math.floor(Math.random()*r.length)]);
+			this.$bus.$emit("switchModal",SaveEditor);
 		},
 		editProject: function() {
 			this.$bus.$emit("switchModal",InfoEditor);

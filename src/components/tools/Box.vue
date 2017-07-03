@@ -12,6 +12,9 @@
 		<button class="btn btn-default" @click="tryAddPolygon">
 			<span class="icon-transform"></span>
 		</button>
+		<button class="btn btn-default" @click="gotoCurrentPosition">
+			<span class="icon-target"></span>
+		</button>
 	</div>
 </template>
 
@@ -36,6 +39,12 @@ export default {
 					this.$bus.$emit("updatePolygonArea",shape);
 					this.$bus.$emit("showPolygonInfo",shape,true);
 				}).catch(result => this.$bus.$emit("error",result));
+			});
+		},
+		gotoCurrentPosition: function() {
+			navigator.geolocation && navigator.geolocation.getCurrentPosition(position => {
+				this.$store.dispatch("viewport/update",{what:"center",e:new google.maps.LatLng(position.coords.latitude,position.coords.longitude)});
+				this.$store.dispatch("viewport/update",{what:"zoom",e:14});
 			});
 		}
 	}

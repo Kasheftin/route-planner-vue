@@ -24,7 +24,7 @@
 				:key="s.id"
 				:draggable="true"
 				:editable="true"
-				:options="{strokeColor:s.color,fillColor:s.color,strokeOpacity:0.8,strokeWeight:2,fillOpacity:0.35}"
+				:options="{strokeColor:s.color,fillColor:s.color,strokeOpacity:0.8,strokeWeight:3,fillOpacity:0.35}"
 				:path="s.path"
 				@path_changed="updatePolygonPath(s,$event)"
 				@rightclick="removePolygonPoint(s,$event)"

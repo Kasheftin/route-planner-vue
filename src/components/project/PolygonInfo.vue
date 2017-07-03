@@ -12,6 +12,11 @@
 				<div class="form-group">
 					<textarea class="form-control" v-model="text" rows="5" ref="text" placeholder="Polygon description"></textarea>
 				</div>
+				<div class="form-group rp-colors">
+					<template v-for="c in colors">
+						<span class="rp-color" :class="{'-sel':color==c}" :style="{backgroundColor:c}" @click="color=c"></span>
+					</template>
+				</div>
 			</div>
 			<p class="rp-iwin-param" v-if="r.path">
 				<span class="rp-iwin-param-field">Area: </span>
@@ -33,6 +38,7 @@
 
 <script>
 import Marked from "marked";
+import config from "../../config";
 
 export default {
 	data: function() {
@@ -41,7 +47,9 @@ export default {
 			editing: false,
 			name: "",
 			text: "",
-			replacedPosition: undefined
+			color: "",
+			replacedPosition: undefined,
+			colors: config.colors
 		}
 	},
 	computed: {
@@ -73,6 +81,7 @@ export default {
 		edit: function() {
 			this.name = this.r.name;
 			this.text = this.r.text;
+			this.color = this.r.color;
 			this.editing = true;
 			this.$nextTick(() => {
 				this.$refs.text.focus();
@@ -81,10 +90,11 @@ export default {
 		cancel: function() {
 			this.name = "";
 			this.text = "";
+			this.color = "";
 			this.editing = false;
 		},
 		save: function() {
-			this.$store.dispatch("project/setShapeData",{id:this.r.id,name:this.name,text:this.text}).then(result => {
+			this.$store.dispatch("project/setShapeData",{id:this.r.id,name:this.name,text:this.text,color:this.color}).then(result => {
 				this.$bus.$emit("success",result.msg);
 				this.$bus.$emit("toggleDotInfo");
 				this.cancel();

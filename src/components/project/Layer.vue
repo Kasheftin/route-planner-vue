@@ -269,7 +269,7 @@ export default {
 		},
 		buildRoute: function(s) {
 			this.$store.dispatch("project/setShapeData",{id:s.id,loading:true});
-			this.$bus.$emit("buildRoute",s,(resultType,result) => {
+			this.$bus.$emit("buildRoute",s,false,(resultType,result) => {
 				if (resultType=="success") {
 					this.$store.dispatch("project/setShapeData",{id:s.id,editing:false,loading:false});
 				}

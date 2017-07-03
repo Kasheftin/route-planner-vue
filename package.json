@@ -16,6 +16,7 @@
     "babel-preset-stage-2": "^6.24.1",
     "bootstrap-sass": "^3.3.7",
     "bson": "^1.0.4",
+    "clipboard": "^1.7.1",
     "cross-env": "^3.0.0",
     "css-loader": "^0.25.0",
     "cssnext": "^1.8.4",
@@ -48,6 +49,7 @@
     "vue-svg-icon": "^1.2.9",
     "vue-template-compiler": "^2.2.1",
     "vue2-google-maps": "^0.7.7",
+    "vuedraggable": "^2.14.1",
     "vuex": "^2.3.1",
     "webpack": "^2.2.0",
     "webpack-dev-server": "^2.2.0"

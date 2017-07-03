@@ -65,7 +65,8 @@ export default {
 			mapTypeId: state => state.mapTypeId
 		}),
 		...mapState("project",{
-			projectInitialized: state => !!state.id
+			projectInitialized: state => !!state.id,
+			shapes: state => state.shapes
 		}),
 		...mapGetters("project",["visibleRoutesIs"]),
 		...mapState("tool",{
@@ -74,10 +75,16 @@ export default {
 	},
 	watch: {
 		projectInitialized: function(b) {
-			console.log("projectInitialized",b);
 			if (!b) {
 				this.$store.dispatch("tool/setTool");
 			}
+		},
+		shapes: function(shapes) {
+			_.each(shapes,s => {
+				if (s.type=="route") {
+					this.$bus.$emit("buildRoute",s,true);
+				}
+			});
 		},
 		tool: function(tool) {
 			this.map && this.map.setOptions({draggableCursor:tool=="marker"?"crosshair":null});
@@ -92,13 +99,13 @@ export default {
 				r.setMap(ids[id]?this.map:undefined);
 			});
 		},
-		drawRoute: function(id,route) {
-			console.log("drawRoute",id,route,this.visibleRoutesIs);
+		drawRoute: function(id,route,preserveViewport) {
 			if (routes[id]) {
 				routes[id].setMap(undefined);
 				delete routes[id];
 			}
 			routes[id] = new google.maps.DirectionsRenderer({draggable:true,map:this.visibleRoutesIs[id]?this.map:undefined});
+			if (preserveViewport) routes[id].setOptions({preserveViewport:preserveViewport});
 			routes[id].setDirections(route);
 			routes[id].addListener("directions_changed",() => {
 				const directions = routes[id].getDirections();
@@ -164,9 +171,6 @@ export default {
 		this.$bus.$on("closeModal",this._closeModal);
 	},
 	mounted: function() {
-		navigator.geolocation && navigator.geolocation.getCurrentPosition(position => {
-			this.$store.dispatch("viewport/update",{what:"center",e:new google.maps.LatLng(position.coords.latitude,position.coords.longitude)});
-		});
 		this.$refs.map.$mapCreated.then(() => {
 			this.map = this.$refs.map.$mapObject;
 			this.map.setOptions({
@@ -250,7 +254,7 @@ export default {
 				}
 				this.$store.dispatch("project/setShapeData",{id:shape.id,area:area});
 			}
-			this._buildRoute = (shape,callback) => {
+			this._buildRoute = (shape,preserveViewport,callback) => {
 				const filledWaypoints = _.filter(shape.waypoints,w => !!w);
 				if (!filledWaypoints || filledWaypoints.length<2) return callback && callback("error",{msg:"Can not build the route - waypoints are not filled correctly."});
 				const ds = new google.maps.DirectionsService();
@@ -265,7 +269,7 @@ export default {
 				},(response,status) => {
 					if (status == google.maps.DirectionsStatus.OK) {
 						this.updateRouteStat(shape.id,response);
-						this.drawRoute(shape.id,response);
+						this.drawRoute(shape.id,response,preserveViewport);
 						return callback && callback("success");
 					}
 					else return callback && callback("error",{msg:"Failed to build the route."});

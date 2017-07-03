@@ -4,10 +4,11 @@ import config from "../config";
 const STORAGE_KEY = "rp-viewport";
 const initialData = _.extend(config.viewport,JSON.parse(window.localStorage.getItem(STORAGE_KEY))||{});
 
+
 const state = {
 	center: {
-		lat: initialData.lat,
-		lng: initialData.lng
+		lat: parseFloat(initialData.lat),
+		lng: parseFloat(initialData.lng)
 	},
 	zoom: initialData.zoom,
 	mapTypeId: initialData.mapTypeId
@@ -16,8 +17,8 @@ const state = {
 const getters = {
 	viewport: state => {
 		return {
-			lat: state.center.lat,
-			lng: state.center.lng,
+			lat: state.center.lat.toFixed(6),
+			lng: state.center.lng.toFixed(6),
 			zoom: state.zoom,
 			mapTypeId: state.mapTypeId
 		}
@@ -25,12 +26,16 @@ const getters = {
 }
 
 const saveState = _.debounce((state) => {
+	console.log("set viewport",getters.viewport(state));
 	window.localStorage.setItem(STORAGE_KEY,JSON.stringify(getters.viewport(state)));
-},1000);
+},300);
 
 const actions = {
 	update: function({commit},data) {
 		commit("update",data);
+	},
+	set: function({commit},data) {
+		commit("set",data);
 	}
 }
 
@@ -47,6 +52,12 @@ const mutations = {
 			state.mapTypeId = e;
 		}
 		saveState(state);
+	},
+	set: function(state,data) {
+		state.center.lat = parseFloat(data.lat);
+		state.center.lng = parseFloat(data.lng);
+		state.zoom = data.zoom;
+		state.mapTypeId = data.mapTypeId;
 	}
 }
 

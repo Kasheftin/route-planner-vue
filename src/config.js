@@ -2,7 +2,7 @@ export default {
 	viewport: {
 		lat: 48.740,
 		lng: 19.140,
-		zoom: 13,
+		zoom: 14,
 		mapTypeId: "roadmap"
 	},
 	project: {
@@ -29,6 +29,7 @@ export default {
 	},
 	polygon: {
 		name: "Untitled polygon",
-		color: "#FF0000"
-	}
+		color: "#ff0000"
+	},
+	colors: ["#ff0000","#23c8c6","#ffffbf","#4fb7f9"]
 };

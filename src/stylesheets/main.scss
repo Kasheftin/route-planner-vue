@@ -113,6 +113,9 @@ html,body,.rp-container,.vue-map-container {
 .pb0 {
 	padding-bottom: 0;
 }
+.nooverflow {
+	overflow: hidden;
+}
 
 .rp-toastrs {
 	position: fixed;
@@ -398,4 +401,35 @@ html,body,.rp-container,.vue-map-container {
 .icon-spin {
 	animation: icon-spin 2s infinite linear;
 	display: inline-block;
+}
+
+.rp-color {
+	display: inline-block;
+	width: 17px;
+	height: 17px;
+	border-radius: 4px;
+	border: 1px solid rgba(0,0,0,0.2);
+	line-height: 18px;
+	font-size: 10px;
+	margin-right: 5px;
+	cursor: pointer;
+	&.-sel {
+		border: 1px solid #222222;
+		position: relative;
+		&::after {
+			font-family: "fontello";
+			content: "\E80C";
+			position: absolute;
+			left: 3px;
+		}
+	}
+}
+
+.rp-alert-icon-close {
+	font-size: 13px;
+	line-height: 13px;
+}
+
+.rp-import {
+	margin-top: 20px;
 }

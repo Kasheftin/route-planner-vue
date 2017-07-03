@@ -7,6 +7,7 @@ import "./stylesheets/icons/css/fontello-embedded.css";
 import App from "./components/App.vue";
 import PromisesBus from "./utils/PromisesBus";
 import Draggable from "vuedraggable";
+import Alert from "./components/utils/Alert.vue";
 import store from "./store";
 
 Vue.use(VueGoogleMaps,{
@@ -17,6 +18,7 @@ Vue.use(VueGoogleMaps,{
 });
 
 Vue.component("Draggable",Draggable);
+Vue.component("Alert",Alert);
 
 Vue.filter("latlng",function(ar) {
 	const lat = _.isFunction(ar.lat)?ar.lat():ar.lat;
@@ -47,8 +49,11 @@ Vue.filter("distance",function(v) {
 
 Vue.filter("sq",function(v) {
 	v = Math.floor(v);
-	if (v<1000*100) return v+" sqm";
-	v = v/1000/1000;
+	if (v<1000) return v+" sqm";
+	v = v/10000;
+	if (v<10) return v.toFixed(1)+" ha";
+	if (v<100) return Math.round(v)+" ha";
+	v = v/100;
 	if (v<1) return v.toFixed(2)+" sqkm";
 	if (v<10) return v.toFixed(1)+" sqkm";
 	return Math.round(v)+" sqkm";

@@ -4,6 +4,7 @@ import config from "../config";
 
 const state = {
 	id: undefined,
+	privateId: undefined,
 	name: "",
 	description: "",
 	layersIds: [],
@@ -32,6 +33,36 @@ const getters = {
 			}
 		});
 		return ids;
+	},
+	export: (state,getters) => {
+		const out = {
+			id: state.id,
+			privateId: state.privateId,
+			name: state.name,
+			description: state.description,
+			layers: []
+		};
+		state.layersIds.forEach(id => {
+			const layer = $.extend(true,{},state.layers[id]);
+			layer.shapes = [];
+			layer.shapesIds.forEach(id => {
+				const shape = $.extend(true,{},state.shapes[id]);
+				delete shape.editing;
+				delete shape.loading;
+				delete shape.layerId;
+				delete shape.distance;
+				delete shape.duration;
+				delete shape.area;
+				if (shape.geocode) {
+					delete shape.geocode.loading;
+				}
+				layer.shapes.push(shape);
+			});
+			delete layer.shapesIds;
+			out.layers.push(layer);
+
+		});
+		return out;
 	}
 }
 
@@ -40,6 +71,7 @@ const actions = {
 		return new Promise((resolve,reject) => {
 			const data = {
 				id: (new ObjectID).toString(),
+				privateId: (new ObjectID).toString(),
 				name: "Untitled map",
 				description: "This is sample description",
 				layersIds: [],
@@ -69,7 +101,36 @@ const actions = {
 	},
 	loadProject: function({commit},data) {
 		return new Promise((resolve,reject) => {
-			commit("setupProject",data);
+			console.log("loadProject start");
+			if (!data) return reject({msg:"Project data not found."});
+			const out = _.extend({
+				id: (new ObjectID).toString(),
+				privateId: (new ObjectID).toString(),
+				name: "Untitled map",
+				description: "This is sample description",
+				layersIds: [],
+				layers: {},
+				shapes: {}
+			},_.pick(data,"id","privateId","name","description"));
+			(data.layers||[]).forEach(l => {
+				const layer = _.extend({
+					id: (new ObjectID).toString(),
+					name: "Untitled layer",
+					visible: true,
+					expanded: true,
+					shapesIds: []
+				},_.pick(l,"id","name","visible","expanded"));
+				(l.shapes||[]).forEach(s => {
+					const shape = prepareShapeData(s.type,s);
+					shape.layerId = layer.id;
+					out.shapes[shape.id] = shape;
+					layer.shapesIds.push(shape.id);
+				});
+				out.layers[layer.id] = layer;
+				out.layersIds.push(layer.id);
+			});
+			console.log("loadProject",out);
+			commit("setupProject",out);
 			resolve({msg:"Project "+data.name+" opened."});
 		});
 	},
@@ -120,7 +181,6 @@ const actions = {
 			const l = state.layers[data.id];
 			if (!l) return reject({msg:"Layer #"+data.id+" does not exist."});
 			if (!data.hasOwnProperty("visible")) data.visible = !l.visible;
-			console.log("set",data.visible,l);
 			commit("setLayerData",{layer:l,visible:data.visible});
 			resolve({msg:"Layer "+(data.visible?"is visible now.":"is invisible now.")});
 		});
@@ -176,7 +236,6 @@ const actions = {
 	setShapeData: function({commit},data) {
 		return new Promise((resolve,reject) => {
 			const s = state.shapes[data.id];
-			console.log("setShaepData",data,s);
 			if (!s) return reject({msg:"Shape #"+data.id+" does not exist.1"});
 			data.shape = s;
 			commit("setShapeData",data);
@@ -202,6 +261,7 @@ const actions = {
 	},
 	moveShape: function({commit},e) {
 		return new Promise((resolve,reject) => {
+			console.log("moveShape",e);
 			const layerFrom = state.layers[e.from.dataset.layerId];
 			const layerTo = state.layers[e.to.dataset.layerId];
 			if (!layerFrom) return reject("Failed to determine the layer shape should be moved from.");
@@ -268,7 +328,6 @@ const mutations = {
 		Vue.delete(state.shapes,data.shape.id);
 	},
 	setShapeData: function(state,data) {
-		console.log("setShapeData",data);
 		_.each(data.shape,(v,k) => {
 			if (k!="id" && data.hasOwnProperty(k)) {
 				Vue.set(data.shape,k,data[k]);
@@ -329,16 +388,21 @@ const prepareMarkerData = function(data) {
 	out.placeId = data.place_id;
 	out.photos = [];
 	(data.photos||[]).forEach((p) => {
-		out.photos.push({
-			thumb: p.getUrl({maxHeight:240,maxWidth:360}),
-			big: p.getUrl({maxHeight:1200,maxWidth:1600})
-		});
+		if (p.hasOwnProperty("getUrl")) {
+			out.photos.push({
+				thumb: p.getUrl({maxHeight:240,maxWidth:360}),
+				big: p.getUrl({maxHeight:1200,maxWidth:1600})
+			});
+		}
+		else if (p.thumb && p.big) {
+			out.photos.push(_.pick(p,"thumb","big"));
+		}
 	});
 	return _.pick(out,"id","type","name","formatted_address","international_phone_number","icon","types","url","note","position","placeId","photos");
 }
 
 const prepareDotData = function(data) {
-	const out = _.extend(true,{
+	const out = $.extend(true,{
 		id: (new ObjectID).toString(),
 		type: "dot",
 		name: "",
