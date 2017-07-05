@@ -1,0 +1,5 @@
+{
+	"user": "mysql-user-name",
+	"pass": "mysql-user-password",
+	"db": "mysql-db"
+}
