@@ -12,6 +12,10 @@ const state = {
 	shapes: {}
 }
 
+const getRandomId = function() {
+	return (new ObjectID((new Date).getTime()+Math.floor(Math.random()*1234567890))).toString();
+}
+
 const getters = {
 	layers: (state,getters) => {
 		return state.layersIds.map(layerId => state.layers[layerId]);
@@ -70,8 +74,8 @@ const actions = {
 	openNewProject: function({commit}) {
 		return new Promise((resolve,reject) => {
 			const data = {
-				id: (new ObjectID).toString(),
-				privateId: (new ObjectID).toString(),
+				id: getRandomId(),
+				privateId: getRandomId(),
 				name: "Untitled map",
 				description: "This is sample description",
 				layersIds: [],
@@ -79,14 +83,14 @@ const actions = {
 				shapes: {}
 			};
 			const layer1 = {
-				id: (new ObjectID).toString(),
+				id: getRandomId(),
 				name: "Untitled layer",
 				visible: true,
 				expanded: true,
 				shapesIds: []
 			};
 			const layer2 = {
-				id: (new ObjectID).toString(),
+				id: getRandomId(),
 				name: "Layer 2",
 				visible: true,
 				expanded: true,
@@ -103,8 +107,8 @@ const actions = {
 		return new Promise((resolve,reject) => {
 			if (!data) return reject({msg:"Project data not found."});
 			const out = _.extend({
-				id: (new ObjectID).toString(),
-				privateId: (new ObjectID).toString(),
+				id: getRandomId(),
+				privateId: getRandomId(),
 				name: "Untitled map",
 				description: "This is sample description",
 				layersIds: [],
@@ -113,7 +117,7 @@ const actions = {
 			},_.pick(data,"id","privateId","name","description"));
 			(data.layers||[]).forEach(l => {
 				const layer = _.extend({
-					id: (new ObjectID).toString(),
+					id: getRandomId(),
 					name: "Untitled layer",
 					visible: true,
 					expanded: true,
@@ -135,9 +139,8 @@ const actions = {
 	cloneProject: function({commit}) {
 		return new Promise((resolve,reject) => {
 			commit("setupProject",{
-				id: (new ObjectID).toString(),
-				privateId: (new ObjectID).toString()
-			});
+				id: getRandomId(),
+				privateId: getRandomId()			});
 			resolve({msg:"Project has been cloned."});
 		});
 	},
@@ -164,7 +167,7 @@ const actions = {
 	addLayer: function({commit}) {
 		return new Promise((resolve,reject) => {
 			const data = {
-				id: (new ObjectID).toString(),
+				id: getRandomId(),
 				name: "Untitled layer",
 				visible: true,
 				expanded: true,
@@ -378,7 +381,7 @@ const prepareShapeData = function(type,data) {
 
 const prepareMarkerData = function(data) {
 	const out = _.extend({
-		id: (new ObjectID).toString(),
+		id: getRandomId(),
 		type: "marker",
 		name: "",
 		formatted_address: "",
@@ -404,12 +407,13 @@ const prepareMarkerData = function(data) {
 			out.photos.push(_.pick(p,"thumb","big"));
 		}
 	});
+	console.log("prepareMarkerData",data,out);
 	return _.pick(out,"id","type","name","formatted_address","international_phone_number","icon","types","url","note","position","placeId","photos");
 }
 
 const prepareDotData = function(data) {
 	const out = $.extend(true,{
-		id: (new ObjectID).toString(),
+		id: getRandomId(),
 		type: "dot",
 		name: "",
 		text: "",
@@ -427,7 +431,7 @@ const prepareDotData = function(data) {
 
 const prepareRouteData = function(data) {
 	const out = _.extend(true,{
-		id: (new ObjectID).toString(),
+		id: getRandomId(),
 		type: "route",
 		name: "",
 		distance: 0,
@@ -444,7 +448,7 @@ const prepareRouteData = function(data) {
 
 const preparePolygonData = function(data) {
 	const out = _.extend(true,{
-		id: (new ObjectID).toString(),
+		id: getRandomId(),
 		type: "polygon",
 		name: "",
 		text: "",

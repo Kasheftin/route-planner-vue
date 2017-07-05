@@ -49,6 +49,7 @@ export default {
 		},
 		thumbs: function() {
 			return _.map((this.r.photos||[]).slice(0,2),(p) => {
+				console.log(p,p.getUrl({maxHeight:240,maxWidth:360}),p.getUrl({maxHeight:1280,maxWidth:1920}));
 				return p.getUrl({maxHeight:240,maxWidth:360});
 			});
 		}
