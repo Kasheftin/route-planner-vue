@@ -40,9 +40,9 @@
 								<tbody>
 									<tr v-for="project in projects">
 										<td>
-											<div v-if="project.name"><a href="javascript:void(0)" @click="loadProject(project)">{{project.name}}</a></div>
+											<div v-if="project.name"><a href="javascript:void(0)" @click="$bus.$emit('loadProject',project)">{{project.name}}</a></div>
 											<div v-if="project.name">ID: {{project.id}}</div>
-											<div v-else>ID: <a href="javascript:void(0)" @click="loadProject(project)">{{project.id}}</a></div>
+											<div v-else>ID: <a href="javascript:void(0)" @click="$bus.$emit('loadProject',project)">{{project.id}}</a></div>
 											<div>Private key: <span v-if="project.privateId">{{project.privateId}}</span><span v-else>--viewonly--</span></div>
 										</td>
 										<td>
@@ -109,21 +109,16 @@ export default {
 		...mapActions("project",{
 			"openNewProject": "openNewProject"
 		}),
-		openProject: function(data) {
-			this.$store.dispatch("project/loadProject",data.project).then(result => {
-				this.$bus.$emit("success",result.msg);
-				this.$store.dispatch("viewport/set",data.viewport);
-			}).catch(result => {
-				this.$bus.$emit("error",result.msg);
-				this.importAlert = {type:"error",message:result.msg};
-			});
-		},
 		importJson: function() {
 			try {
 				this.importAlert = undefined;
 				if (!this.importText || this.importText.length==0) throw {message:"JSON data is empty."};
 				const data = JSON.parse(this.importText);
-				this.openProject(data);
+				this.$bus.$emit("openProject",data,(resultType,result) => {
+					if (resultType=="error") {
+						this.importAlert = {type:"error",message:result.msg};
+					}
+				});
 			}
 			catch(e) {
 				this.importAlert = {type:"error",message:e.message};
@@ -180,16 +175,6 @@ export default {
 				this.$bus.$emit("success",result);
 			}).catch(result => this.$bus.$emit("error",result));
 		},
-		loadProject: function(project) {
-			this.$bus.$emit("makeRequest",project,(resultType,result) => {
-				if (resultType=="success") {
-					this.openProject(result.data);
-				}
-				else {
-					this.$bus.$emit("error",result.message);
-				}
-			});
-		},
 		deleteFromServer: function(project) {
 			this.$bus.$emit("makeRequest",{id:project.id,privateId:project.privateId,action:"delete"},(resultType,result) => {
 				if (resultType=="success") {
@@ -200,7 +185,7 @@ export default {
 					this.$bus.$emit("error",result.message);
 				}
 			});
-		}
+		},
 	}
 }
 

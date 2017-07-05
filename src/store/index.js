@@ -1,6 +1,6 @@
 import Vue from "vue";
 import Vuex from "vuex";
-import project from "./project-try2";
+import project from "./project";
 import viewport from "./viewport";
 import search from "./search";
 import tool from "./tool";

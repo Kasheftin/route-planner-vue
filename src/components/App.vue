@@ -17,14 +17,14 @@
 			<ProjectPolygonInfo />
 		</gmap-map>
 		<transition name="rp-modal">
-			<div v-if="projectInitialized">
+			<div v-if="projectInitialized&&isReady">
 				<Project />
 				<SearchBox />
 				<ToolBox />
 			</div>
 		</transition>
 		<transition name="rp-modal">
-			<template v-if="!projectInitialized">
+			<template v-if="!projectInitialized&&isReady">
 				<Manager />
 			</template>
 		</transition>
@@ -32,6 +32,7 @@
 			<component :is="modalWindowComponent" v-bind="modalWindowProps" />
 		</transition>
 		<Toastr />
+		<Router />
 	</div>
 </template>
 
@@ -49,6 +50,7 @@ import SearchDetailedResult from "./search/DetailedResult.vue";
 import ToolBox from "./tools/Box.vue";
 import Toastr from "./utils/Toastr.vue";
 import config from "../config";
+import Router from "./Router.vue";
 
 const routes = {};
 
@@ -56,7 +58,8 @@ export default {
 	data: function() {
 		return {
 			modalWindowComponent: undefined,
-			modalWindowProps: undefined
+			modalWindowProps: undefined,
+			isReady: false
 		}
 	},
 	computed: {
@@ -141,7 +144,6 @@ export default {
 					totalDuration += leg.duration.value;
 				});
 			}
-			console.log("updateRouteStat",totalDuration,totalDistance);
 			this.$store.dispatch("project/setShapeData",{id:id,distance:totalDistance,duration:totalDuration});
 		},
 		latLng2Point: function(latLng,map) {
@@ -303,6 +305,31 @@ export default {
 					}
 				});
 			}
+			this._loadProject = (project,callback) => {
+				this.$bus.$emit("makeRequest",_.pick(project,"id","privateId"),(resultType,result) => {
+					if (resultType=="success") {
+						this.$bus.$emit("openProject",result.data,callback);
+					}
+					else {
+						this.$bus.$emit("error",result.message);
+						callback && callback(resultType,result);
+					}
+				});
+			}
+			this._openProject = (data,callback) => {
+				this.$store.dispatch("project/loadProject",data.project).then(result => {
+					this.$bus.$emit("success",result.msg);
+					this.$bus.$emit("setRoute",data.project);
+					this.$store.dispatch("viewport/set",data.viewport);
+					callback && callback("success",result);
+				}).catch(result => {
+					this.$bus.$emit("error",result.msg);
+					callback && callback("error",result);
+				});
+			}
+			this._isReady = (isReady) => {
+				this.isReady = isReady;
+			}
 			this.$bus.$on("setMapBounds",this._setMapBounds);
 			this.$bus.$on("setMapCenter",this._setMapCenter);
 			this.$bus.$on("updateDotGeocode",this._updateDotGeocode);
@@ -311,11 +338,14 @@ export default {
 			this.$bus.$on("destroyRoute",this._destroyRoute);
 			this.$bus.$on("tryAddPolygon",this._tryAddPolygon);
 			this.$bus.$on("makeRequest",this._makeRequest);
+			this.$bus.$on("loadProject",this._loadProject);
+			this.$bus.$on("openProject",this._openProject);
+			this.$bus.$on("isReady",this._isReady);
 			this.$promises.resolve("mapReady",this.map);
 		});
 	},
 	beforeDestroy: function() {
-		["switchModal","closeModal","setMapBounds","setMapCenter","buildRoute","destroyRoute","tryAddPolygon","updateDotGeocode","updatePolygonArea","makeRequest"].forEach((f) => {
+		["switchModal","closeModal","setMapBounds","setMapCenter","buildRoute","destroyRoute","tryAddPolygon","updateDotGeocode","updatePolygonArea","makeRequest","loadProject","openProject","isReady"].forEach((f) => {
 			this.hasOwnProperty("_"+f) && this.$bus.$off(f,this["_"+f]);
 		});
 	},
@@ -333,7 +363,8 @@ export default {
 		SearchResults,
 		SearchDetailedResult,
 		ToolBox,
-		Toastr
+		Toastr,
+		Router
 	}
 }
 </script>

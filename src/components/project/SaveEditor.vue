@@ -58,6 +58,7 @@ export default {
 					this.$bus.$emit("success",result.message);
 					this.alert = {type:"success",message:result.message};
 					this.$store.dispatch("ensureProjectInProjectList",this.$store.getters["project/export"]);
+					this.$bus.$emit("setRoute",this.$store.getters["project/export"]);
 				}
 				else {
 					this.$bus.$emit("error",result.message);
