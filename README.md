@@ -20,8 +20,8 @@ Here's the sample of my [eurotrip 2017](https://kasheftin.github.io/route-planne
 
 ## Libraries
 
- * [vue.js](https://vuejs.org/) with a lot of velocity animations.
- * [vuex](https://vuex.vuejs.org/) with namespaced modules and normalizr approach and flat structure.
+ * [vue.js](https://vuejs.org/) with a lot of [velocity](https://github.com/julianshapiro/velocity) animations.
+ * [vuex](https://vuex.vuejs.org/) with namespaced modules, normalizr approach and flat structure.
  * [vue2-google-maps](https://github.com/xkjyeah/vue-google-maps) + native google maps api for directions.
  * [sortablejs](https://github.com/RubaXa/Sortable) with [vuedraggable](https://github.com/SortableJS/Vue.Draggable).
  * Centralized event bus like [this one](https://jsfiddle.net/g8Lqv0rx/10/).
