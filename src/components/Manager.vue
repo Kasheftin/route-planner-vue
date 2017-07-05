@@ -4,14 +4,15 @@
 			<div class="rp-modal-body pt0">
 				<h1>Route Planner Vue v0.1</h1>
 				<p class="lead">Simple free tool for planning routes</p>
-				<p>This is the clone of my original Route Planner that was written to deeply understand vue.js.</p>
+				<p>This is the clone of my old original <a href="https://github.com/Kasheftin/RoutePlanner">Route Planner</a> that was written to deeply understand vue.js.</p>
 				<p>
-					It uses vue.js, vuex, vue2-google-maps, sortablejs and a couple of well known approaches like centralized event bus and centralized promise bus.
+					It uses <a href="https://vuejs.org/">vue.js</a>, <a href="https://vuex.vuejs.org/">vuex</a>, <a href="https://github.com/xkjyeah/vue-google-maps">vue2-google-maps</a>, <a href="https://github.com/RubaXa/Sortable">sortablejs</a> and a couple of well known approaches like centralized event bus and centralized promise bus.
 					Several utilities like webpack, fontello, velocity and bootstrap also are in use.
 				</p>
 				<p>
 					There's also small optional php+mysql backend for storing the data.
 				</p>
+				<p>Github repo: <a href="https://github.com/Kasheftin/route-planner-vue">https://github.com/Kasheftin/route-planner-vue</a>.</p>
 				<div class="rp-welcome-buttons">
 					<button class="btn btn-default" @click="openNewProject">Create New Project</button>
 					<button class="btn btn-default" @click="switchLoad">Load Project</button>
