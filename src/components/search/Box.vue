@@ -37,7 +37,6 @@ export default {
 	},
 	mounted: function() {
 		this.$promises.when("mapReady").then((map) => {
-			console.log("Box mounted ready");
 			this.map = map;
 			this.bounds = map.getBounds();
 			this.service = new google.maps.places.PlacesService(map);

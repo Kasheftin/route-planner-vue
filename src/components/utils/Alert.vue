@@ -4,6 +4,9 @@
 			<div class="alert" :class="[className,css]">
 				<button type="button" class="close rp-alert-icon-close" @click="close"><span class="icon-times"></span></button>
 				{{message}}
+				<div class="clearfix text-center" v-if="buttons.length">
+					<button v-for="button in buttons" class="btn btn-default" :class="button.class" @click="button.action">{{button.label}}</button>
+				</div>
 			</div>
 		</div>
 	</transition>
@@ -18,7 +21,8 @@ export default {
 		return {
 			show: false,
 			type: "",
-			message: ""
+			message: "",
+			buttons: []
 		};
 	},
 	props: ["data","css"],
@@ -46,6 +50,7 @@ export default {
 					this.type = this.nextData.type;
 					this.message = this.nextData.message;
 					this.show = true;
+					this.buttons = this.nextData.buttons||[];
 				}
 				this.working = false;
 			});

@@ -4,7 +4,7 @@
 			<div class="rp-rcontrols">
 				<a class="icon-save" href="javascript:void(0)" @click="saveProject"></a>
 				<a class="icon-cog" href="javascript:void(0)" @click="editProject"></a>
-				<a class="icon-times" href="javascript:void(0)" @click="$store.dispatch('project/closeProject')"></a>
+				<a class="icon-times" href="javascript:void(0)" @click="closeProject"></a>
 			</div>
 			<h4>{{name}}</h4>
 			<p v-if="description" v-html="compiledDescription"></p>
@@ -39,7 +39,6 @@ export default {
 		}),
 		...mapGetters("project",["layers"]),
 		compiledDescription: function() {
-			console.log("this.$store",this.$store);
 			return Marked(this.$store.state.project.description,{sanitize:true});
 		}
 	},
@@ -59,6 +58,11 @@ export default {
 		},
 		editProject: function() {
 			this.$bus.$emit("switchModal",InfoEditor);
+		},
+		closeProject: function() {
+			this.$store.dispatch("project/closeProject").then(result => {
+				this.$bus.$emit("setRoute");
+			}).catch(result => this.$bus.$emit("error",result));
 		}
 	},
 	mounted: function() {
