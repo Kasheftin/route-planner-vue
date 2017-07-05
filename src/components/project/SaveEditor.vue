@@ -25,7 +25,7 @@
 			</div>
 			<div class="rp-modal-buttons clearfix">
 				<div class="pull-right">
-					<button class="btn btn-primary" @click="$bus.$emit('closeModal')">Save to Server</button>
+					<button class="btn btn-primary" @click="save">Save to Server</button>
 					<button class="btn btn-default" @click="$bus.$emit('closeModal')">Close</button>
 				</div>
 			</div>
@@ -53,28 +53,34 @@ export default {
 	},
 	methods: {
 		save: function() {
-			this.$store.dispatch("project/setProjectData",{name:this.name,description:this.description}).then(result => {
-				this.$bus.$emit("success",result.msg);
-				this.$bus.$emit("closeModal");
-			}).catch(result => this.$bus.$emit("error",result.msg));
-		},
-		saveToLocalStorage: function() {
-			const p = new Promise((resolve,reject) => {
-				const data = this.$store.getters["project/export"];
-				const currentJSON = localStorage.getItem("rp-"+data.id);
-				if (currentJSON && currentJSON.length>0) {
-					const current = JSON.parse(currentJSON);
-					if (current.privateId==data.privateId) return resolve(data);
-					else return reject();
+			this.$bus.$emit("makeRequest",{data:this.json,action:"save"},(resultType,result) => {
+				if (resultType=="success") {
+					this.$bus.$emit("success",result.message);
+					this.alert = {type:"success",message:result.message};
+					this.$store.dispatch("ensureProjectInProjectList",this.$store.getters["project/export"]);
 				}
-				return resolve(data);
-			});
-			p.then(data => {
-				this.$bus.$emit("success","Project data saved to LocalStorage.");
-				this.alert = {type:"success",message:"Project data saved to LocalStorage."};
-				console.log("save",data);
-			}).catch(e => {
-				console.log("reject",e);
+				else {
+					this.$bus.$emit("error",result.message);
+					if (result.code=="privateIdMismatch") {
+						this.alert = {
+							type: "error",
+							message: "The private key you are trying to save project with is incorrect. You can not overwrite the existing project, but you can clone it and save with the other (id, privateKey) pair.",
+							buttons: [{
+								label: "Clone project & save",
+								class: "btn-success",
+								action: () => {
+									this.$store.dispatch("project/cloneProject").then(result => {
+										this.$bus.$emit("success",result);
+										this.save();
+									}).catch(result => this.$bus.$emit("error",result));
+								}
+							}]
+						};
+					}
+					else {
+						this.alert = {type:"error",message:result.message};
+					}
+				}
 			});
 		}
 	},

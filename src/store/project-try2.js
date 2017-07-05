@@ -134,6 +134,15 @@ const actions = {
 			resolve({msg:"Project "+data.name+" opened."});
 		});
 	},
+	cloneProject: function({commit}) {
+		return new Promise((resolve,reject) => {
+			commit("setupProject",{
+				id: (new ObjectID).toString(),
+				privateId: (new ObjectID).toString()
+			});
+			resolve({msg:"Project has been cloned."});
+		});
+	},
 	closeProject: function({commit}) {
 		return new Promise((resolve,reject) => {
 			const data = {

@@ -48,6 +48,7 @@ import SearchResults from "./search/Results.vue";
 import SearchDetailedResult from "./search/DetailedResult.vue";
 import ToolBox from "./tools/Box.vue";
 import Toastr from "./utils/Toastr.vue";
+import config from "../config";
 
 const routes = {};
 
@@ -288,6 +289,20 @@ export default {
 				const path = _.map([p1,p2,p3,p4],p=>{return{lat:p.lat(),lng:p.lng()}});
 				this.$bus.$emit("tryAdd","polygon",{path:path},callback);
 			}
+			this._makeRequest = (data,callback) => {
+				$.ajax({
+					url: config.api.url,
+					type: "post",
+					dataType: "json",
+					data: data,
+					success: (result) => callback(result.type,result),
+					error: (xhr,settings,errorMessage) => {
+						const data = JSON.parse(xhr.responseText||errorMessage);
+						const result = (typeof data=="object" && data.hasOwnProperty("type")) ? data : {type:"error",message:data};
+						return callback(result.type,result);
+					}
+				});
+			}
 			this.$bus.$on("setMapBounds",this._setMapBounds);
 			this.$bus.$on("setMapCenter",this._setMapCenter);
 			this.$bus.$on("updateDotGeocode",this._updateDotGeocode);
@@ -295,11 +310,12 @@ export default {
 			this.$bus.$on("buildRoute",this._buildRoute);
 			this.$bus.$on("destroyRoute",this._destroyRoute);
 			this.$bus.$on("tryAddPolygon",this._tryAddPolygon);
+			this.$bus.$on("makeRequest",this._makeRequest);
 			this.$promises.resolve("mapReady",this.map);
 		});
 	},
 	beforeDestroy: function() {
-		["switchModal","closeModal","setMapBounds","setMapCenter","buildRoute","destroyRoute","tryAddPolygon","updateDotGeocode","updatePolygonArea"].forEach((f) => {
+		["switchModal","closeModal","setMapBounds","setMapCenter","buildRoute","destroyRoute","tryAddPolygon","updateDotGeocode","updatePolygonArea","makeRequest"].forEach((f) => {
 			this.hasOwnProperty("_"+f) && this.$bus.$off(f,this["_"+f]);
 		});
 	},
