@@ -1,6 +1,6 @@
 export default {
 	api: {
-		url: "http://route-planner.booger.ru/api"
+		url: "https://route-planner.booger.ru/api"
 	},
 	viewport: {
 		lat: 48.740,
