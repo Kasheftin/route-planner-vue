@@ -1,0 +1,105 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "This file is @generated automatically"
+    ],
+    "hash": "1bee7fc7ac3e9da728120042b6bd5395",
+    "content-hash": "99d5f9c0aa7bf6b9fdcc2adcd34d616b",
+    "packages": [
+        {
+            "name": "colshrapnel/safemysql",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/colshrapnel/safemysql.git",
+                "reference": "9360eabc1cff7729bec004c5944ae1cccdd1e35c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/colshrapnel/safemysql/zipball/9360eabc1cff7729bec004c5944ae1cccdd1e35c",
+                "reference": "9360eabc1cff7729bec004c5944ae1cccdd1e35c",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.0.0"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "safemysql.class.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Colonel Shrapnel",
+                    "email": "col.shrapnel@gmail.com",
+                    "role": "lead"
+                }
+            ],
+            "description": "A real safe and convenient way to handle MySQL queries.",
+            "homepage": "https://github.com/colshrapnel/safemysql",
+            "keywords": [
+                "db",
+                "mysql"
+            ],
+            "time": "2015-05-08 05:59:39"
+        },
+        {
+            "name": "kasheftin/safemysql-static",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Kasheftin/safemysql-static.git",
+                "reference": "64f98846f2fb1540941ab00263a34db952050d2e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Kasheftin/safemysql-static/zipball/64f98846f2fb1540941ab00263a34db952050d2e",
+                "reference": "64f98846f2fb1540941ab00263a34db952050d2e",
+                "shasum": ""
+            },
+            "require": {
+                "colshrapnel/safemysql": "1.0.0",
+                "php": "^7.0"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "db.class.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Alexey Kuznetsov",
+                    "email": "kasheftin@gmail.com",
+                    "role": "lead"
+                }
+            ],
+            "description": "Static class wrapper for SafeMySQL class, supports several connections.",
+            "homepage": "https://github.com/kasheftin/safemysql-static",
+            "keywords": [
+                "db",
+                "mysql",
+                "safemysql"
+            ],
+            "time": "2017-07-03 19:10:44"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": [],
+    "platform-dev": []
+}
