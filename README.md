@@ -8,7 +8,7 @@ See [the demo on github pages](https://kasheftin.github.io/route-planner-vue/) o
 
 Here's the sample of my [eurotrip 2017](https://kasheftin.github.io/route-planner-vue/#id=35edf9f9873e1f00001e934f).
 
-![route planner vue demo screen](https://kasheftin.github.io/route-planner-vue/src/assets/screen01.png)
+![route planner vue demo screen](src/assets/screen01.png)
 
 ## Core functionality
 
